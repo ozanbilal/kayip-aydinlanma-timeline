@@ -295,6 +295,8 @@
     .axis-row { position: absolute; left: 0; right: 0; top: 0; height: 58px; z-index: 3; border-bottom: 1px solid rgba(23,34,49,.22); background: rgba(242,238,228,.86); backdrop-filter: blur(5px); }
     .axis-title { position: absolute; top: 11px; left: 14px; color: var(--ink-soft); font: 700 .62rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
     .axis-tick { position: absolute; top: 30px; height: 28px; border-left: 1px solid rgba(23,34,49,.27); color: var(--ink-soft); padding-left: 6px; font: 600 .64rem var(--mono); white-space: nowrap; }
+    .axis-break { position: absolute; top: 0; bottom: 0; border-left: 2px dashed var(--rust); opacity: .75; pointer-events: none; z-index: 4; }
+    .axis-break span { position: absolute; top: 8px; left: 8px; color: var(--rust); background: rgba(242,238,228,.9); padding: 2px 4px; font: 700 .5rem var(--mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
     .track-lane { position: absolute; left: 0; right: 0; height: 107px; z-index: 2; border-bottom: 1px solid rgba(23,34,49,.12); transition: opacity .2s; }
     .track-lane.dimmed { opacity: .25; }
     .lane-power { top: 58px; }.lane-knowledge { top: 165px; }.lane-culture { top: 272px; }.lane-network { top: 379px; }
@@ -585,7 +587,7 @@
       <div class="timeline-overview" aria-label="Tüm dönemi gösteren genel bakış zaman çizgisi">
         <div class="overview-head">
           <span class="section-kicker">Genel bakış / 03</span>
-          <span class="overview-help">Üst şeritte bir noktaya tıklayın · alt timeline oraya kayar</span>
+          <span class="overview-help">MÖ 3500–1000 sıkıştırılmış · üst şeritte bir noktaya tıklayın</span>
         </div>
         <div class="overview-track" id="overviewTrack" role="group" aria-label="Tüm tarih aralığı">
           <span class="overview-viewport" id="overviewViewport" aria-hidden="true"></span>
@@ -752,6 +754,8 @@
     const minYear = -3500;
     const maxYear = 1506;
     const baseWidth = 5000;
+    const scaleBreakYear = -1000;
+    const earlyScaleRatio = .14;
     let activeTrack = 'all';
     let zoomLevel = 1;
     let visibleEvents = [];
@@ -902,7 +906,17 @@
     function getBookLens(item) { return bookLensByTitle[item.title] || eraBookLenses[item.era]; }
     function getBookRef(item) { return bookRefByTitle[item.title] || item.chapter + ' · Starr’ın tam metin baskısı'; }
 
-    function yearToX(year, width) { return ((year - minYear) / (maxYear - minYear)) * width; }
+    function yearToX(year, width) {
+      const earlyWidth = width * earlyScaleRatio;
+      if (year <= scaleBreakYear) return ((year - minYear) / (scaleBreakYear - minYear)) * earlyWidth;
+      return earlyWidth + ((year - scaleBreakYear) / (maxYear - scaleBreakYear)) * (width - earlyWidth);
+    }
+    function xToYear(x, width) {
+      const earlyWidth = width * earlyScaleRatio;
+      const clamped = Math.max(0, Math.min(width, x));
+      if (clamped <= earlyWidth) return minYear + (clamped / earlyWidth) * (scaleBreakYear - minYear);
+      return scaleBreakYear + ((clamped - earlyWidth) / (width - earlyWidth)) * (maxYear - scaleBreakYear);
+    }
     function formatTick(year) { return year < 0 ? 'MÖ ' + Math.abs(year) : year === 0 ? '' : 'MS ' + year; }
     function tickStep() { return zoomLevel === 1 ? 500 : zoomLevel === 2 ? 250 : zoomLevel === 4 ? 100 : 25; }
     function eventMatches(item) {
@@ -924,6 +938,11 @@
         tick.textContent = formatTick(year);
         axis.appendChild(tick);
       }
+      const scaleBreak = document.createElement('span');
+      scaleBreak.className = 'axis-break';
+      scaleBreak.style.left = yearToX(scaleBreakYear, width) + 'px';
+      scaleBreak.innerHTML = '<span>MÖ 1000 sonrası ayrıntılı ölçek</span>';
+      axis.appendChild(scaleBreak);
       return axis;
     }
 
@@ -954,9 +973,9 @@
     }
 
     function formatTimelinePosition() {
-      const maxScroll = Math.max(1, timelineScroll.scrollWidth - timelineScroll.clientWidth);
-      const fraction = timelineScroll.scrollLeft / maxScroll;
-      const year = Math.round(minYear + (maxYear - minYear) * fraction);
+      const width = baseWidth * zoomLevel;
+      const centerX = timelineScroll.scrollLeft + (timelineScroll.clientWidth / 2);
+      const year = Math.round(xToYear(centerX, width));
       return formatTick(year) || 'MS 1';
     }
 
@@ -974,14 +993,14 @@
       eraGroups.forEach(group => {
         const band = document.createElement('span');
         band.className = 'overview-era ' + group.className;
-        band.style.left = ((group.start - minYear) / (maxYear - minYear) * 100) + '%';
-        band.style.width = ((group.end - group.start) / (maxYear - minYear) * 100) + '%';
+        band.style.left = (yearToX(group.start, baseWidth) / baseWidth * 100) + '%';
+        band.style.width = ((yearToX(group.end, baseWidth) - yearToX(group.start, baseWidth)) / baseWidth * 100) + '%';
         overviewTrack.appendChild(band);
       });
       events.forEach(item => {
         const mark = document.createElement('span');
         mark.className = 'overview-event';
-        mark.style.left = ((item.year - minYear) / (maxYear - minYear) * 100) + '%';
+        mark.style.left = (yearToX(item.year, baseWidth) / baseWidth * 100) + '%';
         mark.style.setProperty('--overview-color', trackColors[item.track]);
         mark.title = item.title + ' · ' + item.date;
         overviewTrack.appendChild(mark);
