@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="S. Frederick Starr'ın Kayıp Aydınlanma kitabındaki tarih cetvelinden esinlenen interaktif Orta Asya zaman çizelgesi.">
+  <link rel="icon" href="data:,">
+  <title>Kayıp Aydınlanma · İnteraktif Tarih Cetveli</title>
+  <style>
+    :root {
+      --ink: #172231;
+      --ink-soft: #455467;
+      --night: #101d2d;
+      --night-2: #152a3b;
+      --paper: #f3eee2;
+      --paper-deep: #e7dece;
+      --line: rgba(23,34,49,.16);
+      --gold: #c58b48;
+      --gold-bright: #efc178;
+      --rust: #a9543c;
+      --teal: #428e89;
+      --blue: #3d6f9b;
+      --violet: #776a9d;
+      --shadow: 0 26px 70px rgba(11, 25, 39, .25);
+      --display: "Baskerville", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --body: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--body);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .34;
+      background-image: radial-gradient(rgba(28,40,54,.15) .55px, transparent .55px);
+      background-size: 7px 7px;
+      mix-blend-mode: multiply;
+      z-index: 10;
+    }
+    a { color: inherit; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .hero {
+      min-height: 640px;
+      color: #f5efe1;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 79% 29%, rgba(207,142,70,.2), transparent 25%),
+        radial-gradient(circle at 18% 80%, rgba(62,129,132,.17), transparent 27%),
+        linear-gradient(135deg, #101c2b 0%, #132b3c 56%, #1a3040 100%);
+      isolation: isolate;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -8vw -20vw 28vw;
+      height: 47vw;
+      min-height: 390px;
+      background: repeating-radial-gradient(ellipse at 62% 60%, transparent 0 38px, rgba(239,193,120,.08) 39px 40px);
+      transform: rotate(-15deg);
+      opacity: .55;
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 34px 42px 100px;
+      min-height: 640px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(340px, .85fr);
+      align-items: center;
+      gap: 48px;
+      position: relative;
+      z-index: 1;
+    }
+    .eyebrow, .section-kicker, .control-label, .metric-label, .card-meta, .source-line {
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: .68rem;
+      font-weight: 700;
+    }
+    .eyebrow { color: var(--gold-bright); margin-bottom: 24px; }
+    .hero h1 {
+      margin: 0;
+      max-width: 700px;
+      font: 500 clamp(4.5rem, 10vw, 9.2rem)/.78 var(--display);
+      letter-spacing: -.07em;
+    }
+    .hero h1 em { color: var(--gold-bright); font-style: italic; display: inline-block; margin-left: .14em; }
+    .hero-subtitle {
+      max-width: 570px;
+      color: rgba(245,239,225,.78);
+      margin: 34px 0 25px;
+      font: 400 clamp(1.1rem, 1.7vw, 1.42rem)/1.35 var(--display);
+    }
+    .hero-meta { display: flex; gap: 11px; flex-wrap: wrap; align-items: center; }
+    .hero-pill, .pdf-link {
+      border: 1px solid rgba(239,193,120,.36);
+      border-radius: 999px;
+      padding: 9px 13px;
+      color: #f6e8c8;
+      font-size: .76rem;
+      text-decoration: none;
+      background: rgba(7,18,29,.2);
+      backdrop-filter: blur(8px);
+    }
+    .pdf-link { border-color: var(--gold); background: var(--gold); color: #172231; font-weight: 700; transition: transform .2s, background .2s; }
+    .pdf-link:hover { transform: translateY(-2px); background: var(--gold-bright); }
+    .orbit-art { width: min(100%, 440px); justify-self: end; opacity: .95; filter: drop-shadow(0 20px 28px rgba(0,0,0,.25)); animation: float 8s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+
+    .page { max-width: 1240px; margin: 0 auto; padding: 0 42px 80px; }
+    .briefing { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(270px, .85fr); gap: 38px; padding: 78px 0 64px; align-items: end; }
+    .section-kicker { color: var(--rust); margin-bottom: 17px; }
+    .briefing h2 { margin: 0; font: 500 clamp(2rem, 4vw, 3.5rem)/.98 var(--display); letter-spacing: -.045em; max-width: 720px; }
+    .briefing h2 em { color: var(--rust); }
+    .briefing-copy { color: var(--ink-soft); font-size: .98rem; margin: 19px 0 0; max-width: 690px; }
+    .source-note { border-left: 3px solid var(--gold); padding: 6px 0 6px 17px; color: var(--ink-soft); font-size: .82rem; }
+    .source-note strong { color: var(--ink); display: block; margin-bottom: 4px; }
+
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 50px; }
+    .metric { min-height: 118px; padding: 19px 17px 15px; border-top: 1px solid var(--ink); background: rgba(255,255,255,.28); }
+    .metric-number { display: block; font: 500 2.05rem/1 var(--display); color: var(--rust); margin: 16px 0 6px; }
+    .metric-label { color: var(--ink-soft); font-size: .6rem; letter-spacing: .11em; }
+
+    .controls { background: var(--night); color: var(--paper); padding: 27px 28px 23px; box-shadow: var(--shadow); position: relative; z-index: 2; }
+    .controls-top { display: flex; justify-content: space-between; gap: 20px; align-items: start; margin-bottom: 20px; }
+    .controls h3 { font: 500 1.7rem var(--display); margin: 0; }
+    .controls-intro { color: rgba(243,238,226,.62); font-size: .8rem; max-width: 410px; margin: 4px 0 0; }
+    .reset { border: 1px solid rgba(239,193,120,.4); background: transparent; color: var(--gold-bright); padding: 8px 11px; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+    .reset:hover { background: rgba(239,193,120,.12); }
+    .control-grid { display: grid; grid-template-columns: 1.3fr .8fr 1fr; gap: 15px; align-items: end; }
+    .control-label { display: block; color: rgba(243,238,226,.55); margin-bottom: 8px; font-size: .6rem; }
+    .search-wrap { position: relative; }
+    .search-wrap::before { content: "⌕"; position: absolute; top: 7px; left: 12px; color: var(--gold-bright); font-size: 1.3rem; }
+    .search, .era-select { width: 100%; border: 1px solid rgba(243,238,226,.2); background: #203449; color: var(--paper); padding: 11px 13px; outline: none; }
+    .search { padding-left: 35px; }
+    .search:focus, .era-select:focus { border-color: var(--gold-bright); box-shadow: 0 0 0 3px rgba(239,193,120,.12); }
+    .search::placeholder { color: rgba(243,238,226,.45); }
+    .filter-tabs { display: flex; flex-wrap: wrap; gap: 7px; }
+    .filter-tab { border: 1px solid rgba(243,238,226,.2); color: rgba(243,238,226,.7); background: transparent; padding: 10px 11px; font-size: .72rem; transition: .2s; }
+    .filter-tab:hover, .filter-tab.active { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+    .control-bottom { margin-top: 20px; display: flex; justify-content: space-between; gap: 12px; align-items: center; color: rgba(243,238,226,.6); font-size: .76rem; }
+    .toggle { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+    .toggle input { accent-color: var(--gold); }
+    .result-count { font-family: var(--mono); color: var(--gold-bright); }
+
+    .timeline-wrap { position: relative; padding: 82px 0 25px; }
+    .timeline-head { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; margin-bottom: 55px; }
+    .timeline-head h2 { margin: 0; font: 500 2.6rem var(--display); letter-spacing: -.04em; }
+    .timeline-head p { margin: 0; color: var(--ink-soft); font-size: .8rem; text-align: right; }
+    .timeline { position: relative; padding: 0 0 40px; }
+    .timeline::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: linear-gradient(to bottom, transparent, var(--gold) 5%, var(--line) 20%, var(--line) 80%, transparent); transform: translateX(-50%); }
+    .era { position: relative; margin: 0 0 76px; }
+    .era:last-child { margin-bottom: 20px; }
+    .era-banner { display: flex; justify-content: center; margin-bottom: 30px; position: relative; z-index: 2; }
+    .era-banner span { border: 1px solid var(--gold); color: var(--rust); background: var(--paper); padding: 8px 15px; font: 700 .64rem var(--mono); letter-spacing: .15em; text-transform: uppercase; box-shadow: 0 0 0 7px var(--paper); }
+    .event { width: calc(50% - 42px); position: relative; margin-bottom: 27px; animation: rise .5s both; }
+    .event:nth-child(odd) { margin-left: auto; }
+    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .event::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--paper); border: 3px solid var(--gold); position: absolute; top: 23px; z-index: 2; box-shadow: 0 0 0 4px var(--paper); }
+    .event:nth-child(odd)::before { left: -48px; }
+    .event:nth-child(even)::before { right: -48px; }
+    .event-card { display: block; border: 1px solid var(--line); border-left: 3px solid var(--accent, var(--gold)); background: rgba(255,255,255,.43); color: var(--ink); padding: 19px 21px 18px; text-align: left; width: 100%; transition: transform .23s, box-shadow .23s, background .23s; }
+    .event-card:hover, .event-card:focus-visible { transform: translateY(-4px); background: #fffaf0; box-shadow: 0 16px 30px rgba(41,48,58,.13); outline: none; }
+    .event.major .event-card { background: #fffaf0; border-top: 2px solid var(--accent, var(--gold)); }
+    .card-meta { display: flex; justify-content: space-between; gap: 10px; align-items: center; color: var(--accent, var(--rust)); font-size: .62rem; }
+    .card-meta .page-ref { color: var(--ink-soft); font-weight: 500; letter-spacing: .06em; }
+    .event h3 { margin: 10px 0 6px; font: 500 1.48rem/1.05 var(--display); letter-spacing: -.025em; }
+    .event p { color: var(--ink-soft); margin: 0; font-size: .82rem; line-height: 1.55; }
+    .card-footer { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
+    .tag { color: var(--ink-soft); font-size: .64rem; padding: 4px 7px; border: 1px solid rgba(23,34,49,.15); background: rgba(231,222,206,.42); }
+    .event.hidden { display: none; }
+    .empty-state { padding: 70px 20px; text-align: center; color: var(--ink-soft); border: 1px dashed var(--line); display: none; }
+    .empty-state.show { display: block; }
+
+    .footer-note { margin-top: 42px; padding: 26px 0 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; gap: 35px; color: var(--ink-soft); font-size: .78rem; }
+    .footer-note strong { color: var(--ink); display: block; margin-bottom: 5px; }
+    .footer-note p { margin: 0; }
+    .footer-note a { color: var(--rust); font-weight: 700; }
+
+    .modal-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(10,19,30,.68); display: grid; place-items: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal { max-width: 630px; width: 100%; background: var(--paper); padding: 32px; position: relative; box-shadow: var(--shadow); transform: translateY(12px); transition: transform .25s; }
+    .modal-backdrop.open .modal { transform: translateY(0); }
+    .modal-close { position: absolute; top: 13px; right: 13px; border: 0; background: transparent; color: var(--ink-soft); font-size: 1.5rem; line-height: 1; }
+    .modal .card-meta { margin-right: 20px; }
+    .modal h2 { font: 500 2.6rem/1 var(--display); margin: 17px 0 10px; }
+    .modal p { color: var(--ink-soft); font-size: .94rem; }
+    .modal-detail { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: .75rem; }
+    .modal-detail strong { display: block; color: var(--ink); font-family: var(--mono); font-size: .61rem; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 3px; }
+
+    @media (max-width: 850px) {
+      .hero-inner { grid-template-columns: 1fr; min-height: 620px; padding-inline: 26px; }
+      .orbit-art { position: absolute; right: -4%; bottom: 26px; width: 300px; opacity: .52; }
+      .page { padding-inline: 26px; }
+      .briefing { grid-template-columns: 1fr; gap: 24px; padding-top: 62px; }
+      .control-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .timeline-head { display: block; }
+      .timeline-head p { text-align: left; margin-top: 8px; }
+      .timeline::before { left: 16px; }
+      .event, .event:nth-child(odd) { width: calc(100% - 47px); margin-left: 47px; }
+      .event:nth-child(odd)::before, .event:nth-child(even)::before { left: -38px; right: auto; }
+      .footer-note { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .hero-inner { padding-inline: 20px; }
+      .page { padding-inline: 18px; }
+      .hero h1 { font-size: clamp(4rem, 21vw, 6.2rem); }
+      .hero-subtitle { max-width: 350px; }
+      .metrics { gap: 7px; }
+      .metric { padding: 15px 12px; min-height: 100px; }
+      .metric-number { font-size: 1.7rem; }
+      .controls { padding: 21px 18px 18px; }
+      .controls-top { display: block; }
+      .reset { margin-top: 14px; }
+      .filter-tabs { display: grid; grid-template-columns: repeat(2, 1fr); }
+      .filter-tab { text-align: left; }
+      .timeline-wrap { padding-top: 58px; }
+      .timeline-head h2 { font-size: 2.2rem; }
+      .event h3 { font-size: 1.25rem; }
+      .modal { padding: 26px 22px 23px; }
+      .modal h2 { font-size: 2.2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+    /* Horizontal archive-table layout */
+    .hero { min-height: 174px; }
+    .hero-inner { min-height: 174px; padding: 18px 42px 20px; grid-template-columns: minmax(0, 1fr) 150px; gap: 20px; }
+    .hero h1 { font-size: clamp(2.8rem, 4.7vw, 4.45rem); line-height: .77; }
+    .hero-subtitle { margin: 10px 0 9px; max-width: 720px; font-size: .82rem; }
+    .eyebrow { margin-bottom: 9px; }
+    .orbit-art { width: 145px; opacity: .64; }
+    .page { padding-bottom: 56px; }
+    .horizontal-briefing { padding: 16px 0 15px; grid-template-columns: minmax(0, 1.55fr) minmax(230px, .75fr); gap: 28px; align-items: center; }
+    .horizontal-briefing h2 { font-size: clamp(1.45rem, 2.1vw, 2rem); max-width: none; }
+    .horizontal-briefing .briefing-copy { display: none; }
+    .horizontal-briefing .source-note { font-size: .75rem; }
+    .timeline-workbench { background: #fbf8f0; border: 1px solid rgba(23,34,49,.16); box-shadow: 0 24px 55px rgba(23,34,49,.16); padding: 23px 23px 18px; }
+    .workbench-top { display: flex; justify-content: space-between; gap: 20px; align-items: end; margin-bottom: 18px; }
+    .workbench-top .section-kicker { margin-bottom: 8px; }
+    .workbench-top h2 { margin: 0; font: 500 clamp(1.8rem, 3vw, 2.7rem)/1 var(--display); letter-spacing: -.045em; }
+    .workbench-top h2 span { color: var(--rust); font: 700 .63rem var(--mono); letter-spacing: .1em; vertical-align: middle; margin-left: 9px; white-space: nowrap; }
+    .scroll-callout { color: var(--ink-soft); font: 700 .66rem var(--mono); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .scroll-arrow { color: var(--rust); font-size: 1.25rem; margin-right: 7px; }
+    .timeline-tools { display: grid; grid-template-columns: 1.2fr 1.05fr 2.25fr auto auto auto; gap: 10px; align-items: end; margin-bottom: 16px; padding-bottom: 15px; border-bottom: 1px solid rgba(23,34,49,.14); }
+    .timeline-tools label, .tool-label, .tool-search label, .tool-select label, .tool-filters > label, .tool-zoom > label { display: block; margin-bottom: 6px; color: var(--ink-soft); font: 700 .58rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .tool-search input, .tool-select select { width: 100%; height: 39px; border: 1px solid rgba(23,34,49,.2); background: #fffdf7; color: var(--ink); padding: 0 11px; outline: none; }
+    .tool-search input:focus, .tool-select select:focus { border-color: var(--rust); box-shadow: 0 0 0 3px rgba(169,84,60,.12); }
+    .tool-search input::placeholder { color: rgba(69,84,103,.65); }
+    .timeline-tools .filter-tabs, .zoom-buttons { display: flex; gap: 4px; flex-wrap: nowrap; }
+    .timeline-tools .filter-tab, .zoom-btn { height: 39px; border: 1px solid rgba(23,34,49,.18); background: transparent; color: var(--ink-soft); padding: 0 10px; font-size: .68rem; white-space: nowrap; transition: .15s ease; }
+    .timeline-tools .filter-tab:hover, .timeline-tools .filter-tab.active, .zoom-btn:hover, .zoom-btn.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+    .pivotal-toggle { height: 39px; display: flex !important; align-items: center; gap: 7px; white-space: nowrap; color: var(--ink-soft) !important; text-transform: none !important; letter-spacing: 0 !important; font: 600 .69rem var(--body) !important; margin: 0 !important; }
+    .pivotal-toggle input { accent-color: var(--rust); width: 15px; height: 15px; }
+    .compact-reset { height: 39px; border-color: rgba(169,84,60,.42); color: var(--rust); background: transparent; padding-inline: 11px; white-space: nowrap; }
+    .compact-reset:hover { background: var(--rust); color: var(--paper); }
+    .timeline-frame { height: 486px; display: flex; border: 1px solid rgba(23,34,49,.2); background: #f2eee4; overflow: hidden; }
+    .timeline-rail { flex: 0 0 158px; width: 158px; background: #172536; color: #f3eee2; position: relative; z-index: 4; box-shadow: 8px 0 18px rgba(23,34,49,.13); }
+    .rail-cap { height: 58px; padding: 13px 13px 9px; border-bottom: 1px solid rgba(243,238,226,.2); display: flex; flex-direction: column; justify-content: center; }
+    .rail-cap span { color: var(--gold-bright); font: 700 .62rem var(--mono); letter-spacing: .15em; }
+    .rail-cap small, .rail-row small { color: rgba(243,238,226,.64); font-size: .62rem; margin-top: 2px; }
+    .rail-row { height: 107px; padding: 15px 12px; border-bottom: 1px solid rgba(243,238,226,.12); display: flex; flex-direction: column; justify-content: center; transition: opacity .2s, background .2s; }
+    .rail-row > span:not(.rail-dot) { font: 500 1rem var(--display); }
+    .rail-row.dimmed { opacity: .32; }
+    .rail-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 7px; display: block; }
+    .power-dot { background: #e17a54; }.knowledge-dot { background: #79a8d4; }.culture-dot { background: #bca2d1; }.network-dot { background: #74b7a3; }
+    .timeline-scroll { flex: 1 1 auto; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-color: var(--rust) #d5d1c8; scrollbar-width: auto; outline: none; background: #f5f1e7; cursor: grab; touch-action: none; }
+    .timeline-scroll.is-dragging { cursor: grabbing; user-select: none; }
+    .timeline-event { touch-action: manipulation; }
+    .timeline-scroll:focus-visible { box-shadow: inset 0 0 0 3px rgba(197,139,72,.7); }
+    .timeline-scroll::-webkit-scrollbar { height: 14px; }.timeline-scroll::-webkit-scrollbar-track { background: #d9d4c9; }.timeline-scroll::-webkit-scrollbar-thumb { background: var(--rust); border: 3px solid #d9d4c9; border-radius: 20px; }
+    .timeline#timeline { position: relative; min-width: 1500px; width: 1500px; height: 100%; padding: 0; overflow: hidden; background-image: repeating-linear-gradient(to right, rgba(23,34,49,.06) 0 1px, transparent 1px 82px); }
+    .timeline#timeline::before { display: none; }
+    .period-band { position: absolute; top: 0; bottom: 0; z-index: 0; border-left: 1px solid rgba(23,34,49,.12); border-right: 1px solid rgba(23,34,49,.08); }
+    .period-band span { position: sticky; top: 5px; left: 8px; display: inline-block; color: rgba(23,34,49,.5); font: 700 .58rem var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 7px 8px; white-space: nowrap; }
+    .period-early { background: rgba(241,219,108,.18); }.period-conquest { background: rgba(224,133,135,.15); }.period-samanid { background: rgba(150,198,119,.18); }.period-seljuk { background: rgba(126,182,223,.15); }.period-mongol { background: rgba(155,137,193,.15); }.period-timurid { background: rgba(232,174,101,.18); }
+    .axis-row { position: absolute; left: 0; right: 0; top: 0; height: 58px; z-index: 3; border-bottom: 1px solid rgba(23,34,49,.22); background: rgba(242,238,228,.86); backdrop-filter: blur(5px); }
+    .axis-title { position: absolute; top: 11px; left: 14px; color: var(--ink-soft); font: 700 .62rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .axis-tick { position: absolute; top: 30px; height: 28px; border-left: 1px solid rgba(23,34,49,.27); color: var(--ink-soft); padding-left: 6px; font: 600 .64rem var(--mono); white-space: nowrap; }
+    .track-lane { position: absolute; left: 0; right: 0; height: 107px; z-index: 2; border-bottom: 1px solid rgba(23,34,49,.12); transition: opacity .2s; }
+    .track-lane.dimmed { opacity: .25; }
+    .lane-power { top: 58px; }.lane-knowledge { top: 165px; }.lane-culture { top: 272px; }.lane-network { top: 379px; }
+    .timeline-event { position: absolute; width: 155px; min-height: 42px; padding: 0; border: 0; background: transparent; color: var(--ink); text-align: left; cursor: pointer; transform: translateX(-4px); transition: opacity .18s, filter .18s, transform .18s; z-index: 3; }
+    .timeline-event:hover, .timeline-event:focus-visible { z-index: 8; transform: translateX(-4px) translateY(-2px); outline: none; }
+    .timeline-event:focus-visible .event-label { outline: 2px solid var(--gold); outline-offset: 3px; }
+    .event-mark { display: block; width: 32px; height: 6px; border-radius: 2px; background: var(--event-color); margin-bottom: 7px; box-shadow: 0 2px 0 rgba(23,34,49,.08); }
+    .timeline-event:not(.major) .event-mark { width: 9px; height: 9px; border-radius: 50%; margin: 0 0 7px 10px; }
+    .timeline-event.selected .event-mark { width: 15px; height: 15px; border-radius: 50%; border: 3px solid #fffdf7; box-shadow: 0 0 0 2px var(--event-color); margin-left: 6px; }
+    .event-label { display: block; max-width: 155px; padding: 4px 6px 5px; background: rgba(255,253,247,.84); border-left: 2px solid var(--event-color); box-shadow: 0 4px 12px rgba(23,34,49,.08); }
+    .event-label strong { display: block; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 .75rem/1.15 var(--body); }
+    .event-label small { display: block; color: var(--event-color); margin-top: 3px; font: 700 .56rem var(--mono); letter-spacing: .05em; }
+    .timeline-event:not(.major) .event-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .timeline-event:not(.major):hover .event-label, .timeline-event:not(.major):focus-visible .event-label, .timeline-event.selected .event-label { position: static; width: auto; height: auto; margin: 0; padding: 4px 6px 5px; overflow: visible; clip: auto; white-space: normal; }
+    .timeline-event.sub-1 { top: 59px !important; }
+    .timeline-event.sub-0 { top: 13px !important; }
+    .timeline-foot { display: flex; justify-content: space-between; gap: 10px; padding: 10px 2px 0; color: var(--ink-soft); font: 700 .6rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .axis-status { color: var(--rust); }
+    .timeline-workbench .empty-state { margin-top: 15px; padding: 30px 15px; }
+    .timeline-workbench .empty-state.show { display: block; }
+    .footer-note { margin-top: 28px; padding-top: 20px; }
+    .belief-dot { background: #b46a82; }.city-dot { background: #b7834a; }
+    .timeline-tools { grid-template-columns: 1.05fr 1fr 2.7fr auto auto auto; }
+    .timeline-tools .filter-tabs { flex-wrap: wrap; }
+    .timeline-tools .filter-tab { padding-inline: 8px; }
+    .timeline-overview { margin: 0 0 14px; padding-top: 2px; }
+    .overview-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin-bottom: 7px; }
+    .overview-help { color: var(--ink-soft); font: 600 .58rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+    .overview-track { position: relative; height: 34px; overflow: hidden; border: 1px solid rgba(23,34,49,.22); background: #e8e3d8; cursor: crosshair; }
+    .overview-track::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to right, rgba(23,34,49,.1) 0 1px, transparent 1px 10%); }
+    .overview-era { position: absolute; top: 0; bottom: 0; border-right: 1px solid rgba(23,34,49,.14); opacity: .7; pointer-events: none; }
+    .overview-era.period-early { background: rgba(241,219,108,.38); }.overview-era.period-conquest { background: rgba(224,133,135,.34); }.overview-era.period-samanid { background: rgba(150,198,119,.36); }.overview-era.period-seljuk { background: rgba(126,182,223,.34); }.overview-era.period-mongol { background: rgba(155,137,193,.34); }.overview-era.period-timurid { background: rgba(232,174,101,.38); }
+    .overview-event { position: absolute; top: 9px; width: 5px; height: 16px; padding: 0; border: 0; border-radius: 2px; background: var(--overview-color); transform: translateX(-2px); opacity: .78; z-index: 2; }
+    .overview-event:hover, .overview-event:focus-visible { width: 9px; opacity: 1; outline: 2px solid var(--ink); outline-offset: 2px; }
+    .overview-viewport { position: absolute; top: -2px; bottom: -2px; left: 0; width: 48%; border: 2px solid var(--rust); background: rgba(169,84,60,.08); box-shadow: 0 0 0 1px rgba(255,253,247,.8) inset; z-index: 3; pointer-events: none; transition: left .12s ease, width .12s ease; }
+    .overview-foot { display: flex; justify-content: space-between; color: var(--ink-soft); font: 700 .55rem var(--mono); letter-spacing: .08em; margin-top: 4px; }
+    .sticky-timeline-header { --sticky-axis-height: 58px; position: sticky; top: 0; z-index: 12; display: grid; grid-template-columns: 158px minmax(0, 1fr); height: var(--sticky-axis-height); margin-bottom: calc(-1 * var(--sticky-axis-height)); border: 1px solid rgba(23,34,49,.2); background: #f2eee4; box-shadow: 0 8px 18px rgba(23,34,49,.12); pointer-events: none; }
+    .sticky-axis-rail { padding: 13px 13px 9px; border-right: 1px solid rgba(243,238,226,.2); background: #172536; color: #f3eee2; display: flex; flex-direction: column; justify-content: center; }
+    .sticky-axis-rail span { color: var(--gold-bright); font: 700 .62rem var(--mono); letter-spacing: .15em; }
+    .sticky-axis-rail small { color: rgba(243,238,226,.64); font-size: .62rem; margin-top: 2px; }
+    .sticky-axis-viewport { min-width: 0; overflow: hidden; background: #f2eee4; }
+    .sticky-axis-track { position: relative; height: var(--sticky-axis-height); min-width: 1500px; will-change: transform; }
+    .sticky-axis-track .axis-row { position: absolute; inset: 0; }
+    .timeline-frame { --axis-height: 58px; --lane-count: 6; --lane-height: calc((100% - var(--axis-height)) / var(--lane-count)); }
+    .timeline-rail .rail-cap { height: var(--axis-height); }
+    .timeline-rail .rail-row { height: var(--lane-height); min-height: 0; padding-block: 10px; }
+    .timeline#timeline .axis-row { height: var(--axis-height); }
+    .timeline#timeline .track-lane { height: var(--lane-height); }
+    .timeline#timeline .lane-power { top: var(--axis-height); }
+    .timeline#timeline .lane-knowledge { top: calc(var(--axis-height) + var(--lane-height)); }
+    .timeline#timeline .lane-belief { top: calc(var(--axis-height) + var(--lane-height) + var(--lane-height)); }
+    .timeline#timeline .lane-culture { top: calc(var(--axis-height) + var(--lane-height) + var(--lane-height) + var(--lane-height)); }
+    .timeline#timeline .lane-city { top: calc(var(--axis-height) + var(--lane-height) + var(--lane-height) + var(--lane-height) + var(--lane-height)); }
+    .timeline#timeline .lane-network { top: calc(var(--axis-height) + var(--lane-height) + var(--lane-height) + var(--lane-height) + var(--lane-height) + var(--lane-height)); }
+    @media (min-width: 761px) {
+      .page { width: 100%; max-width: none; padding-inline: 0; }
+      .horizontal-briefing, .footer-note { width: 100%; padding-inline: clamp(18px, 2.3vw, 34px); }
+      .timeline-workbench { width: 100%; border-left: 0; border-right: 0; }
+    }
+    /* PDF-like expanded panels: more vertical room for headings and reading notes. */
+    .timeline-workbench { position: relative; top: auto; height: auto; min-height: 0; display: block; }
+    .timeline-workbench .timeline-frame { flex: none; min-height: 0; height: auto; }
+    .timeline-event { width: 205px; min-height: 48px; }
+    .event-label { max-width: 205px; padding: 7px 9px 8px; background: rgba(255,253,247,.94); }
+    .event-label strong { max-width: 187px; font-size: .78rem; white-space: normal; }
+    .event-label small { font-size: .56rem; line-height: 1.25; }
+    .event-label p { display: block; max-width: 187px; max-height: 2.4em; overflow: hidden; color: var(--ink-soft); margin: 5px 0 0; font-size: .66rem; line-height: 1.35; }
+    .timeline-event:not(.major) .event-label { display: block; position: static; width: auto; height: auto; padding: 7px 9px 8px; margin: 0; overflow: visible; clip: auto; white-space: normal; }
+    .timeline-event:not(.major):hover .event-label, .timeline-event:not(.major):focus-visible .event-label, .timeline-event.selected .event-label { position: static; width: auto; height: auto; padding: 7px 9px 8px; margin: 0; overflow: visible; clip: auto; white-space: normal; }
+    .timeline-event.sub-0 { top: 14px !important; }
+    .timeline-event.sub-1 { top: 96px !important; }
+    .timeline-event.sub-2 { top: 178px !important; }
+    .timeline-event.sub-3 { top: 260px !important; }
+    .timeline-event.sub-4 { top: 342px !important; }
+    .timeline-event.sub-5 { top: 424px !important; }
+    @media (max-width: 760px) {
+      .timeline-workbench { position: relative; height: auto; min-height: 0; }
+      .timeline-event { width: 190px; }
+      .event-label { max-width: 190px; }
+      .event-label strong, .event-label p { max-width: 172px; }
+    }
+    .modal-backdrop { display: block; background: rgba(10,19,30,.5); padding: 0; opacity: 0; }
+    .modal { margin-left: auto; margin-right: 0; max-width: 440px; height: 100%; min-height: 100%; padding: 34px 28px; box-shadow: -22px 0 60px rgba(10,19,30,.24); transform: translateX(100%); transition: transform .25s; }
+    .modal-backdrop.open .modal { transform: translateX(0); }
+    .modal-context-block { margin: 19px 0 0; padding-top: 15px; border-top: 1px solid var(--line); }
+    .modal-context-kicker { color: var(--rust); font: 700 .61rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .modal-context-block p { margin: 7px 0 0; color: var(--ink); font-size: .87rem; line-height: 1.55; }
+
+    @media (max-width: 1100px) {
+      .timeline-tools { grid-template-columns: 1fr 1fr 2fr; }
+      .tool-zoom, .pivotal-toggle, .compact-reset { grid-row: 2; }
+      .timeline-frame { height: 478px; }
+    }
+    @media (max-width: 760px) {
+      .hero { min-height: 205px; }
+      .hero-inner { min-height: 205px; padding: 24px 24px 28px; grid-template-columns: 1fr; }
+      .hero h1 { font-size: clamp(3.4rem, 16vw, 5rem); }
+      .hero-subtitle { max-width: 450px; font-size: .9rem; margin: 17px 0 14px; }
+      .orbit-art { display: none; }
+      .page { padding-inline: 18px; }
+      .horizontal-briefing { padding: 28px 0 23px; grid-template-columns: 1fr; gap: 17px; }
+      .horizontal-briefing h2 { font-size: 2rem; }
+      .timeline-workbench { padding: 18px 12px 14px; }
+      .workbench-top { display: block; }
+      .scroll-callout { margin-top: 11px; }
+      .timeline-tools { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .tool-search, .tool-select, .tool-filters { grid-column: 1 / -1; }
+      .tool-zoom, .pivotal-toggle, .compact-reset { grid-row: auto; }
+      .timeline-tools .filter-tabs { flex-wrap: wrap; }
+      .timeline-tools .filter-tab { flex: 1 1 auto; }
+      .timeline-frame { height: 515px; }
+      .timeline-rail { flex-basis: 125px; width: 125px; }
+      .sticky-timeline-header { --sticky-axis-height: 60px; grid-template-columns: 125px minmax(0, 1fr); }
+      .rail-row { height: 114px; }
+      .rail-cap { height: 60px; }
+      .timeline#timeline { min-width: 1500px; }
+      .lane-power { top: 60px; }.lane-knowledge { top: 174px; }.lane-culture { top: 288px; }.lane-network { top: 402px; }
+      .axis-row { height: 60px; }
+      .track-lane { height: 114px; }
+      .timeline-event { width: 160px; }
+      .timeline-foot { font-size: .55rem; }
+      .timeline-foot span:not(.axis-status) { display: none; }
+      .axis-status { margin: 0 auto; }
+      .footer-note { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 430px) {
+      .hero-inner { padding-inline: 18px; }
+      .hero-meta { gap: 6px; }.hero-pill, .pdf-link { font-size: .67rem; padding: 7px 9px; }
+      .timeline-tools { grid-template-columns: 1fr; }
+      .tool-zoom, .pivotal-toggle, .compact-reset { grid-row: auto; }
+      .zoom-buttons { display: grid; grid-template-columns: repeat(4, 1fr); }.zoom-btn { width: 100%; }
+      .timeline-frame { height: 500px; }
+      .timeline-rail { flex-basis: 106px; width: 106px; }
+      .sticky-timeline-header { grid-template-columns: 106px minmax(0, 1fr); }
+      .rail-row { padding-inline: 8px; }.rail-row > span:not(.rail-dot) { font-size: .9rem; }.rail-row small { font-size: .55rem; }
+    }
+    /* Viewport gallery mode: the archive becomes the screen while scrolling through it. */
+    @media (min-width: 761px) {
+      .timeline-workbench {
+        position: sticky;
+        top: 12px;
+        z-index: 8;
+        height: calc(100svh - 24px);
+        min-height: 640px;
+        display: flex;
+        flex-direction: column;
+      }
+      .timeline-workbench .timeline-frame {
+        flex: 1 1 auto;
+        min-height: 0;
+        height: auto;
+      }
+      .timeline-workbench .timeline-foot { flex: 0 0 auto; }
+    }
+    /* Final reading mode override: the page grows downward like the source PDF. */
+    @media (min-width: 761px) {
+      .timeline-workbench { position: relative; top: auto; height: auto; min-height: 0; display: block; z-index: 2; }
+      .timeline-workbench .timeline-frame { flex: none; height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow">S. Frederick Starr · 2013 / Türkçe 2020</div>
+        <h1>Kayıp<br><em>Aydınlanma</em></h1>
+        <p class="hero-subtitle">Arap fetihlerinden Timur'a: Orta Asya'da bilginin, kentlerin ve fikirlerin izini süren interaktif tarih cetveli.</p>
+        <div class="hero-meta">
+          <span class="hero-pill">MÖ 3500 — MS 1506</span>
+          <span class="hero-pill">Orta Asya</span>
+          <a class="pdf-link" href="https://drive.google.com/file/d/1GmKarej2dQLxvXKCgmihKg8MRY2n8gwG/view?usp=drivesdk" target="_blank" rel="noopener">Kaynak PDF’yi aç ↗</a>
+        </div>
+      </div>
+      <svg class="orbit-art" viewBox="0 0 500 500" aria-label="Soyut yıldız haritası" role="img">
+        <defs>
+          <radialGradient id="orb" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#efc178" stop-opacity=".22"/><stop offset=".6" stop-color="#efc178" stop-opacity=".06"/><stop offset="1" stop-color="#efc178" stop-opacity="0"/></radialGradient>
+          <linearGradient id="ring" x1="0" x2="1"><stop stop-color="#efc178" stop-opacity=".1"/><stop offset=".5" stop-color="#efc178"/><stop offset="1" stop-color="#efc178" stop-opacity=".1"/></linearGradient>
+        </defs>
+        <circle cx="250" cy="250" r="204" fill="url(#orb)"/>
+        <g fill="none" stroke="url(#ring)" stroke-width="1">
+          <circle cx="250" cy="250" r="196"/><circle cx="250" cy="250" r="150"/><circle cx="250" cy="250" r="99"/><ellipse cx="250" cy="250" rx="210" ry="85" transform="rotate(-32 250 250)"/><ellipse cx="250" cy="250" rx="215" ry="122" transform="rotate(35 250 250)"/>
+        </g>
+        <g fill="#efc178">
+          <circle cx="120" cy="115" r="4"/><circle cx="370" cy="112" r="2.4"/><circle cx="395" cy="310" r="4"/><circle cx="178" cy="397" r="2.3"/><circle cx="302" cy="62" r="2"/><circle cx="86" cy="283" r="2.5"/><circle cx="335" cy="377" r="1.8"/><circle cx="250" cy="250" r="8"/>
+        </g>
+        <g fill="none" stroke="#efc178" stroke-opacity=".33" stroke-width="1"><path d="M120 115 250 250 370 112M250 250 395 310 335 377M250 250 178 397 86 283"/></g>
+        <text x="250" y="226" fill="#f3eee2" text-anchor="middle" font-family="Georgia,serif" font-size="15" letter-spacing="4">BİLGİ</text>
+        <text x="250" y="250" fill="#efc178" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="33">dolaşır</text>
+      </svg>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="briefing horizontal-briefing">
+      <div>
+        <div class="section-kicker">Yatay okuma haritası / 01</div>
+        <h2>Yıllar sağa akar; <em>siyaset, bilim, inanç, edebiyat ve ağlar</em> aynı sahnede buluşur.</h2>
+        <p class="briefing-copy">Zamanı kartların alt alta dizildiği bir liste gibi değil, uzanan bir arşiv masası gibi okuyun. Çizgiyi sağa kaydırın, yakınlaştırın veya bir olay seçerek ayrıntı panelini açın.</p>
+      </div>
+      <div class="source-note">
+        <strong>Kaynak ve kapsam</strong>
+        62 düğüm, kitabın 29–33. sayfalarındaki “Tarih Cetveli”nden derlendi. Tarihler yaklaşık olabilir; kartlar kısa okuma notlarıdır.
+      </div>
+    </section>
+
+    <section class="timeline-workbench" aria-label="Yatay interaktif timeline">
+      <div class="workbench-top">
+        <div>
+          <div class="section-kicker">Okuma haritası / 02</div>
+          <h2>Orta Asya kronolojisi <span id="resultCount" aria-live="polite">62 / 62</span></h2>
+        </div>
+        <div class="scroll-callout"><span class="scroll-arrow">⇆</span> Boş alanda tutup çek · zaman genişler</div>
+      </div>
+
+      <div class="timeline-tools" aria-label="Timeline araçları">
+        <div class="tool-search">
+          <label for="search">Ara</label>
+          <input id="search" type="search" placeholder="Buhara, Timur, medrese…" autocomplete="off">
+        </div>
+        <div class="tool-select">
+          <label for="era">Döneme git / filtrele</label>
+          <select id="era">
+            <option value="all">Tüm dönemler</option>
+            <option value="early">MÖ 3500 — MS 650</option>
+            <option value="conquest">650 — 900 · Fetih ve çeviri</option>
+            <option value="samanid">900 — 1040 · Samani / Gazneli</option>
+            <option value="seljuk">1040 — 1219 · Selçuklu dünyası</option>
+            <option value="mongol">1219 — 1336 · Moğol asrı</option>
+            <option value="timurid">1336 — 1506 · Timur ve sonrası</option>
+          </select>
+        </div>
+        <div class="tool-filters">
+          <span class="tool-label">İzlek</span>
+          <div class="filter-tabs" role="group" aria-label="İzlek seçimi">
+            <button class="filter-tab active" type="button" data-filter="all">Tümü</button>
+            <button class="filter-tab" type="button" data-filter="power">Siyasi ve Askeri Tarih</button>
+            <button class="filter-tab" type="button" data-filter="knowledge">Bilim ve Matematik</button>
+            <button class="filter-tab" type="button" data-filter="belief">Din ve Felsefe</button>
+            <button class="filter-tab" type="button" data-filter="culture">Edebiyat ve Sanat</button>
+            <button class="filter-tab" type="button" data-filter="city">Ekonomi ve Toplum</button>
+            <button class="filter-tab" type="button" data-filter="network">Kurum/Mimari</button>
+          </div>
+        </div>
+        <div class="tool-zoom">
+          <span class="tool-label">Yakınlık</span>
+          <div class="zoom-buttons" role="group" aria-label="Timeline yakınlığı">
+            <button type="button" class="zoom-btn active" data-zoom="1">1×</button>
+            <button type="button" class="zoom-btn" data-zoom="2">2×</button>
+            <button type="button" class="zoom-btn" data-zoom="4">4×</button>
+            <button type="button" class="zoom-btn" data-zoom="8">8×</button>
+          </div>
+        </div>
+        <label class="pivotal-toggle"><input id="pivotalToggle" type="checkbox"> Dönüm noktaları</label>
+        <button class="reset compact-reset" id="resetBtn" type="button">Temizle</button>
+      </div>
+
+      <div class="timeline-overview" aria-label="Tüm dönemi gösteren genel bakış zaman çizgisi">
+        <div class="overview-head">
+          <span class="section-kicker">Genel bakış / 03</span>
+          <span class="overview-help">Üst şeritte bir noktaya tıklayın · alt timeline oraya kayar</span>
+        </div>
+        <div class="overview-track" id="overviewTrack" role="group" aria-label="Tüm tarih aralığı">
+          <span class="overview-viewport" id="overviewViewport" aria-hidden="true"></span>
+        </div>
+        <div class="overview-foot"><span>MÖ 3500</span><span>MS 1506</span></div>
+      </div>
+
+      <div class="sticky-timeline-header" id="stickyTimelineHeader" aria-hidden="true">
+        <div class="sticky-axis-rail"><span>İZLEK</span><small>yatay tarih</small></div>
+        <div class="sticky-axis-viewport"><div class="sticky-axis-track" id="stickyAxisTrack"></div></div>
+      </div>
+
+      <div class="timeline-frame">
+        <div class="timeline-rail" aria-hidden="true">
+          <div class="rail-cap"><span>İZLEK</span><small>yatay tarih</small></div>
+          <div class="rail-row" data-rail="knowledge"><span class="rail-dot knowledge-dot"></span><span>Bilim ve Matematik</span><small>ölçüm · gökbilim</small></div>
+          <div class="rail-row" data-rail="belief"><span class="rail-dot belief-dot"></span><span>Din ve Felsefe</span><small>inanç · düşünce</small></div>
+          <div class="rail-row" data-rail="culture"><span class="rail-dot culture-dot"></span><span>Edebiyat ve Sanat</span><small>dil · eser</small></div>
+          <div class="rail-row" data-rail="city"><span class="rail-dot city-dot"></span><span>Ekonomi ve Toplum</span><small>şehir · üretim</small></div>
+          <div class="rail-row" data-rail="network"><span class="rail-dot network-dot"></span><span>Kurum/Mimari</span><small>medrese · yapı</small></div>
+          <div class="rail-row" data-rail="power"><span class="rail-dot power-dot"></span><span>Siyasi ve Askeri Tarih</span><small>hanedan · cephe</small></div>
+        </div>
+        <div class="timeline-scroll" id="timelineScroll" tabindex="0" aria-label="Yatay tarih çizgisi. Boş alanda tutup çekerek sağa, sola, yukarı ve aşağı hareket edebilirsiniz.">
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+      <div class="timeline-foot"><span>← Eski dönemler</span><span class="axis-status" id="axisStatus">MÖ 3500 — MS 1506 · 1× genel görünüm</span><span>Yeni dönemler →</span></div>
+      <div class="empty-state" id="emptyState">Bu filtrelerle eşleşen bir olay yok. Başka bir isim, dönem veya izleği deneyin.</div>
+    </section>
+
+    <section class="footer-note">
+      <p><strong>Nasıl okunmalı?</strong> Yatay mesafe tarihsel uzaklığı temsil eder; sıkışan dönemlerde yakınlaştırma düğmelerini kullanın. Olayın tam bağlamı için başlığı seçin.</p>
+      <p><strong>Kaynak</strong> S. Frederick Starr, <em>Kayıp Aydınlanma: Arap Fetihlerinden Timur'a Orta Asya'nın Altın Çağı</em>, Yusuf Selman İnanç çevirisi, Kronik Kitap, 4. baskı, İstanbul, 2020. <a href="https://drive.google.com/file/d/1GmKarej2dQLxvXKCgmihKg8MRY2n8gwG/view?usp=drivesdk" target="_blank" rel="noopener">Drive’daki PDF ↗</a></p>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop" role="presentation" hidden>
+    <aside class="modal" aria-label="Timeline olay ayrıntısı">
+      <button class="modal-close" id="modalClose" type="button" aria-label="Pencereyi kapat">×</button>
+      <div class="card-meta"><span id="modalMeta"></span><span class="page-ref" id="modalPage"></span></div>
+      <h2 id="modalTitle"></h2>
+      <p id="modalDescription"></p>
+      <div class="modal-context-block"><span class="modal-context-kicker">Kitaptaki bağlam</span><p id="modalContext"></p></div>
+      <div class="modal-detail">
+        <div><strong>İzlek</strong><span id="modalTrack"></span></div>
+        <div><strong>Dönem</strong><span id="modalEra"></span></div>
+        <div><strong>Kitaptaki yeri</strong><span id="modalChapter"></span></div>
+        <div><strong>Okuma notu</strong><span id="modalNote"></span></div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const events = [
+      {year:-3500, date:'MÖ 3500–3000', era:'early', track:'network', label:'Başlangıç', title:'Kentlerin ve ekmeğin ilk düğümleri', description:'Afganistan lapis lazulisinin uzak pazarlara ulaşması, kent merkezlerinin belirginleşmesi ve tohum ekiminin yaygınlaşması; Orta Asya’yı erken bir dolaşım alanı olarak gösterir.', tags:['kent','ticaret','tarım'], chapter:'Bölüm 1 · Dünyanın Merkezi', page:'s. 29', major:true, note:'Kitaptaki cetvelin başlangıç noktası.'},
+      {year:-1050, date:'MÖ 1100–1000', era:'early', track:'knowledge', label:'İnanç', title:'Zerdüşt ve tek tanrılı düşünce', description:'Zerdüşt’ün bu dönemde yaşadığı düşünülür. Hesap günü, cennet-cehennem ve diriliş gibi öğretiler sonraki dinî dünyalarda yankı bulur.', tags:['düşünce','din'], chapter:'Bölüm 3 · Meziyetler, İnançlar ve Fikirler Kazanı', page:'s. 29', major:false, note:'Tarih yaklaşık.'},
+      {year:-1000, date:'MÖ 1100–1000?', era:'early', track:'city', label:'Ulaşım / üretim', title:'Baktriya devesi taşımacılığa katılır', description:'Baktriya devesi, Orta Asya’da bölge içi ve kıtalar arası taşımacılıkta kullanılmaya başlar. Hayvan gücü, kentleri ve uzun mesafeli ağları birbirine bağlayan altyapının parçasıdır.', tags:['Baktriya','deve','ulaşım'], chapter:'Bölüm 2 · Dünya Düşkünü Kentliler, Kadim Topraklar', page:'s. 29', major:false, note:'Cetvelde Zerdüşt satırının ardından ayrı tarih verilmeden yer alır; tarih yaklaşık işaretlenmiştir.'},
+      {year:-563, date:'MÖ 563', era:'early', track:'knowledge', label:'Kişi', title:'Gautama Buddha’nın doğumu', description:'Hindistan’da doğan Buddha, Orta Asya’nın kültürel ve dinî ağlarını uzun süre etkileyecek bir düşünce hattının başlangıç figürüdür.', tags:['Budizm','Hindistan'], chapter:'Bölüm 3 · Meziyetler, İnançlar ve Fikirler Kazanı', page:'s. 29', major:false, note:'Kitaptaki kronolojik referans.'},
+      {year:-329, date:'MÖ 329–326', era:'early', track:'power', label:'Savaş / dolaşım', title:'Büyük İskender’in Orta Asya seferleri', description:'Persepolis’in yıkılmasının ardından İskender, Orta Asya ve Afganistan’da üç yıl sürecek bir savaş yürütür; Helenistik dünyayla yeni temas alanları oluşur.', tags:['Baktriya','Helenistik dünya'], chapter:'Bölüm 1 · Dünyanın Merkezi', page:'s. 29', major:true, note:'Savaş ve kültürel temas aynı anda ilerler.'},
+      {year:-127, date:'MÖ 127', era:'early', track:'power', label:'Hanedan', title:'Kuşan iktidarı ve Budizm', description:'Kuşan iktidarı başlar; I. Kanişka’nın Budizm’i desteklemesiyle kuzey Hindistan, Afganistan ve Orta Asya arasındaki kültür akışı güçlenir.', tags:['Kuşanlar','Budizm'], chapter:'Bölüm 3 · Meziyetler, İnançlar ve Fikirler Kazanı', page:'s. 29', major:true, note:'İmparatorluk, dinî ağın taşıyıcısı olur.'},
+      {year:-114, date:'MÖ 114', era:'early', track:'network', label:'Ticaret', title:'İpek batıya doğru yol alıyor', description:'Çin ipeğinin batıya ihracı başlar; ardından Orta Asya’da ipekböceği üretimi yükselir. Maddi kültür, bilgi ve güzergâhları da beraberinde taşır.', tags:['İpek Yolu','üretim'], chapter:'Bölüm 2 · Dünya Düşkünü Kentliler, Kadim Topraklar', page:'s. 29', major:false, note:'Ağlar izleğinin erken örneği.'},
+      {year:-53, date:'MÖ 53', era:'early', track:'power', label:'Savaş', title:'Partların Crassus’u yenmesi', description:'Orta Asyalı Part ordusu Roma generali Crassus’u mağlup eder ve Akdeniz’e uzanan güç dengelerinde etkili olur.', tags:['Partlar','Roma'], chapter:'Bölüm 2 · Dünya Düşkünü Kentliler, Kadim Topraklar', page:'s. 29', major:false, note:'Orta Asya’nın çevresel değil merkezî rolünü gösterir.'},
+      {year:540, date:'MS 540', era:'early', track:'knowledge', label:'Kurum', title:'Teodor Merv başpiskoposu', description:'Suriyeli Hristiyan dilbilimci, âlim ve filozof Teodor Merv başpiskoposu olur; kent, farklı bilgi geleneklerinin temas noktasıdır.', tags:['Merv','Hristiyanlık'], chapter:'Bölüm 3 · Meziyetler, İnançlar ve Fikirler Kazanı', page:'s. 29', major:false, note:'Çok dilli bilgi çevrelerinin işareti.'},
+      {year:570, date:'MS 570', era:'early', track:'belief', label:'Kişi / inanç', title:'Muhammed’in doğumu', description:'İslam peygamberi Muhammed’in doğumu, birkaç kuşak sonra Orta Asya’yı dönüştürecek dinî ve siyasi ağın başlangıç bağlamını görünür kılar.', tags:['İslam','Arabistan'], chapter:'Bölüm 3–4 · İnançlar ve Fetih', page:'s. 29', major:true, note:'Cetvelde verilen biyografik tarih.'},
+      {year:651, date:'MS 651', era:'early', track:'power', label:'Kırılma', title:'Son Sasani hükümdarı Merv’de ölür', description:'Yezdigirt’in Merv’de ölümü, Sasani siyasi düzeninin sonunu ve bölgedeki yeni güç ilişkilerinin başlamasını simgeler.', tags:['Merv','Sasani'], chapter:'Bölüm 4 · Arapların Orta Asya’yı Fethi', page:'s. 29', major:true, note:'Fetihler öncesi siyasi eşik.'},
+      {year:660, date:'MS 660', era:'conquest', track:'power', label:'Fetih', title:'Arap fetihleri başlıyor', description:'Orta Asya’daki Arap fetihleri başlar. Kitabın ana anlatısı, bu askerî genişlemeyle birlikte bölgenin Bağdat’ı nasıl dönüştürdüğünü de izler.', tags:['fetih','Emeviler'], chapter:'Bölüm 4 · Arapların Orta Asya’yı Fethi', page:'s. 29', major:true, note:'Kitabın başlığındaki ilk tarihsel eşik.'},
+      {year:743, date:'MS 743', era:'conquest', track:'power', label:'İktidar', title:'Emevi düzeninde çözülme', description:'Emevi halifesi Ebu Haşim’in ölümü, Abbasi isyanının ve Müslüman iç savaşının önündeki engellerden birini kaldırır.', tags:['Emeviler','Abbasiler'], chapter:'Bölüm 4 · Arapların Orta Asya’yı Fethi', page:'s. 30', major:false, note:'Cetveldeki siyasi geçiş noktası.'},
+      {year:751, date:'MS 751', era:'conquest', track:'network', label:'Savaş / teknoloji', title:'Talas Savaşı ve kâğıt bilgisi', description:'Abbasiler Tang ordusunu Talas’ta yener. Bu karşılaşma, cetvelde askerî güç kadar kâğıt üretimi ve yazı kültürüyle ilişkilendirilen bir dönemeçtir.', tags:['Talas','kâğıt','Tang'], chapter:'Bölüm 4–5 · Fetih ve Bağdat', page:'s. 30', major:true, note:'Tarih, cetvelde 743 satırından sonra ayrı olay olarak yer alır.'},
+      {year:762, date:'MS 762', era:'conquest', track:'power', label:'Kent', title:'Bağdat başkent olur', description:'Halife Mansur, Merv’deki planlarını hayata geçirerek Bağdat’ı kurdurur ve halifeliğin başkentini oraya taşır. Doğu rüzgârı yeni merkezden eser.', tags:['Bağdat','Merv'], chapter:'Bölüm 5 · Bağdat’ta Doğu Rüzgârı', page:'s. 30', major:true, note:'Orta Asya’nın Bağdat’ı dönüştürmesi.'},
+      {year:780, date:'MS 780', era:'conquest', track:'knowledge', label:'Kişi', title:'El-Harezmi’nin doğumu', description:'Ebu Abdullah Muhammed el-Harezmi’nin doğumu, hesap ve coğrafya bilgisinin Orta Asya’dan İslam dünyasına yayılan uzun hikâyesindeki erken düğümlerden biridir.', tags:['matematik','coğrafya'], chapter:'Bölüm 6 · Seyyah Âlimler', page:'s. 30', major:false, note:'Tarih yaklaşık kabul edilir.'},
+      {year:797, date:'MS 797', era:'conquest', track:'knowledge', label:'Kişi', title:'Ahmed el-Fergani’nin doğumu', description:'Orta Asyalı gökbilimci Ahmed el-Fergani doğar; gökyüzünü ölçme ve açıklama geleneği yeni dillere ve merkezlere taşınır.', tags:['gökbilim','ölçüm'], chapter:'Bölüm 6 · Seyyah Âlimler', page:'s. 30', major:false, note:'Gökyüzü bilgisinin dolaşımı.'},
+      {year:810, date:'MS 810?', era:'conquest', track:'belief', label:'Kişi / hadis', title:'Muhammed el-Buhari doğar', description:'Hadis derlemeleriyle tanınan Muhammed el-Buhari’nin doğumu, Orta Asya şehirlerinin İslamî bilgi ve hafıza üretimindeki rolünü gösterir.', tags:['Buhara','hadis','İslam'], chapter:'Bölüm 6 · Seyyah Âlimler', page:'s. 30', major:false, note:'Cetveldeki yıl OCR metninde 810 olarak okunuyor; yaklaşık işaretlenmiştir.'},
+      {year:810, date:'MS 810–819', era:'conquest', track:'power', label:'Kent', title:'Merv halifeliğin başkenti', description:'Merv, kısa süreliğine halifeliğin başkenti olur. Kitabın ana fikrindeki ters yönlü akış burada görünür: çevre sanılan şehir merkeze dönüşür.', tags:['Merv','başkent'], chapter:'Bölüm 5 · Bağdat’ta Doğu Rüzgârı', page:'s. 30', major:true, note:'Merv’in siyasi merkez olarak zirvesi.'},
+      {year:813, date:'MS 813–833', era:'conquest', track:'knowledge', label:'Kişi / kurum', title:'Memun ve akılcılık sınavları', description:'Ebu Cafer Abdullah Memun halife olur; Bağdat’ta akılcılık imtihanları yürütülür. İnanç, iktidar ve entelektüel kurumlar aynı sahnede buluşur.', tags:['Memun','akılcılık'], chapter:'Bölüm 5 · Bağdat’ta Doğu Rüzgârı', page:'s. 30', major:true, note:'Kitabın bilgi–iktidar gerilimi.'},
+      {year:824, date:'MS 824', era:'conquest', track:'knowledge', label:'Kişi', title:'Tirmizli hadis âlimi', description:'Ebu İsa Muhammed Tirmizi, Özbekistan’daki Tirmiz’de doğar. Seyyah âlimlerin ağı, kentleri yalnızca pazar değil, hafıza mekânı da yapar.', tags:['Tirmiz','hadis'], chapter:'Bölüm 6 · Seyyah Âlimler', page:'s. 30', major:false, note:'Tarih cetvelindeki biyografik düğüm.'},
+      {year:865, date:'MS 865', era:'conquest', track:'knowledge', label:'Kişi / tıp', title:'el-Razi doğar', description:'Tıp otoritesi ve hezarfen Muhammed ibn Zekeriya el-Razi’nin doğumu, Orta Asya çevresindeki bilim ağının tıp, doğa bilgisi ve gözleme açılan damarını güçlendirir.', tags:['el-Razi','tıp','bilim'], chapter:'Bölüm 6 · Seyyah Âlimler', page:'s. 30', major:true, note:'Cetvelde verilen biyografik tarih.'},
+      {year:870, date:'MS 870?', era:'conquest', track:'knowledge', label:'Kişi / felsefe', title:'Farabi doğar', description:'Filozof Ebu Nasr el-Farabi’nin doğumu, Orta Asya kaynaklı düşüncenin mantık, siyaset ve felsefe tartışmalarında yeni bir düğüm oluşturur.', tags:['Farabi','felsefe','mantık'], chapter:'Bölüm 3–6 · Fikirler ve Seyyah Âlimler', page:'s. 30', major:true, note:'Cetvelde yaklaşık tarih olarak verilir.'},
+      {year:875, date:'MS 875–876', era:'samanid', track:'power', label:'Hanedan', title:'İsmail Samani Buhara’da', description:'İsmail Samani, Buhara’da hanedanlığını tesis eder. Sonraki yüzyılın bilim, edebiyat ve mimari üretimi için siyasi bir zemin oluşur.', tags:['Buhara','Samaniler'], chapter:'Bölüm 8 · Samani Hanedanlığı', page:'s. 30', major:true, note:'Samani yükselişinin başlangıcı.'},
+      {year:900, date:'MS 900–934?', era:'samanid', track:'culture', label:'Mimari', title:'İsmail Samani türbesi', description:'Buhara’daki İsmail Samani türbesi inşa edilir. Kitabın “altın çağ” hissini bir taş yapı üzerinden somutlaştıran simge yapılardan biridir.', tags:['Buhara','mimari'], chapter:'Bölüm 8 · Samani Hanedanlığı', page:'s. 30', major:true, note:'Tarih yaklaşık.'},
+      {year:934, date:'MS 934?', era:'samanid', track:'culture', label:'Edebiyat', title:'Firdevsi’nin doğumu', description:'Şehname’nin yazarı Ebu’l Kasım Firdevsi doğar; İranî edebiyatın destansı hafızası Orta Asya tarihinin anlatı katmanını zenginleştirir.', tags:['Firdevsi','Şehname'], chapter:'Bölüm 3 ve 8', page:'s. 30', major:false, note:'Cetvel OCR’ında tarih satırı 934? olarak görünür.'},
+      {year:980, date:'MS 980', era:'samanid', track:'knowledge', label:'Kişi', title:'İbn-i Sina doğar', description:'Ebu Ali el-Hüseyin ibn-i Sina doğar. Tıp, felsefe ve doğa bilgisini birleştiren çalışmaları, Orta Asya’dan çok daha uzak coğrafyalara uzanır.', tags:['İbn-i Sina','tıp'], chapter:'Bölüm 6–9', page:'s. 30', major:true, note:'Kitabın en uzun entelektüel izleklerinden biri.'},
+      {year:998, date:'MS 998–999', era:'samanid', track:'power', label:'İktidar', title:'Gazneli Mahmut’un yükselişi', description:'Mahmut’un Samanileri Horasan’dan çıkarması ve kendisine sultan unvanı vermesi, Gazne merkezli yeni bir siyasi ve kültürel dönemin önünü açar.', tags:['Gazne','Gazneliler'], chapter:'Bölüm 11 · Mahmut’un Gaznesi', page:'s. 30', major:true, note:'Samanilerin sonu yaklaşırken yeni bir merkez doğar.'},
+      {year:998, date:'MS 998–999', era:'samanid', track:'network', label:'Yazışma', title:'Biruni ve İbn-i Sina mektuplaşır', description:'Biruni ile İbn-i Sina’nın mektuplaşması, bilginin yalnızca saraylarda değil, şehirler ve bilginler arasındaki yazışma ağlarında da dolaştığını gösterir.', tags:['Biruni','İbn-i Sina','mektup'], chapter:'Bölüm 6–9 · Seyyah Âlimler ve Ürgenç', page:'s. 30–31', major:true, note:'Cetvelde 998–999 aralığında yer alır; sayfa geçişi içerik baskısına göre değişebilir.'},
+      {year:1002, date:'MS 1002', era:'samanid', track:'power', label:'Kırılma', title:'Samani hanedanlığının düşüşü', description:'Samani hanedanlığı düşer; bilim ve edebiyat çevreleri yeni saraylara, kentlere ve himaye ağlarına doğru dağılır.', tags:['Samaniler','geçiş'], chapter:'Bölüm 8 · Samani Hanedanlığı', page:'s. 30', major:true, note:'Siyasi son, kültürel sürekliliği otomatik olarak bitirmez.'},
+      {year:1005, date:'MS 1005', era:'samanid', track:'network', label:'Seyahat', title:'İbn-i Sina Ürgenç’e gider', description:'Buhara’dan ayrılan İbn-i Sina, idari bir görev aldığı Ürgenç’e gider. Bilginin hareketi, dönemin siyasi haritası kadar önemlidir.', tags:['Ürgenç','seyahat'], chapter:'Bölüm 9 · Memuniler Döneminde Ürgenç', page:'s. 30', major:true, note:'Kişi ve kent ağının güçlü örneği.'},
+      {year:1010, date:'MS 1010', era:'samanid', track:'culture', label:'Eser', title:'Şehname tamamlanır', description:'Firdevsi Şehname’yi tamamlar. Geçmişin destansı biçimde yeniden kurulması, dönemin siyasi ve kültürel hafızasına güçlü bir katman ekler.', tags:['Firdevsi','edebiyat'], chapter:'Bölüm 8 · Samani Hanedanlığı', page:'s. 30', major:true, note:'Tarih cetvelindeki eser tarihi.'},
+      {year:1017, date:'MS 1017', era:'samanid', track:'power', label:'Kırılma', title:'Memun Akademisi’nin sonu', description:'Harezm şahı Ebu Abbas’ın öldürülmesinin ardından Mahmut Ürgenç’i ele geçirip yağmalar; Memun Akademisi’nin sonu gelir.', tags:['Ürgenç','akademi'], chapter:'Bölüm 9 · Memuniler Döneminde Ürgenç', page:'s. 30', major:true, note:'Kültür kurumlarının kırılganlığı.'},
+      {year:1037, date:'MS 1037', era:'samanid', track:'knowledge', label:'Eser', title:'Biruni’nin el-Kanun el-Mesudi’si', description:'Biruni, gökbilimi ve matematik üzerine el-Kanun el-Mesudi’yi tamamlar; ölçüm, hesap ve gözlem büyük bir senteze dönüşür.', tags:['Biruni','matematik'], chapter:'Bölüm 6–9', page:'s. 30', major:true, note:'Cetvelde bilimsel üretimin merkezî örneği.'},
+      {year:1040, date:'MS 1040', era:'seljuk', track:'power', label:'Savaş / hanedan', title:'Dandanakan ve Selçuklu yükselişi', description:'Gazneli Mesud, Belh yakınlarındaki Dandanakan’da Selçuklu ordusuna yenilir ve Hindistan’a kaçar. Selçukluların yükselişi hızlanır.', tags:['Dandanakan','Selçuklular'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 30', major:true, note:'Yeni siyasi çatının başlangıcı.'},
+      {year:1048, date:'MS 1048', era:'seljuk', track:'knowledge', label:'Kişi / ölçüm', title:'Ömer Hayyam doğar', description:'Matematikçi, gökbilimci ve şair Ömer Hayyam’ın doğumu; ölçüm, şiir ve yönetim bilgisinin aynı entelektüel çevrede buluşmasına açılan bir kapıdır.', tags:['Ömer Hayyam','matematik','şiir'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 32', major:false, note:'Cetvelde verilen biyografik tarih.'},
+      {year:1055, date:'MS 1055', era:'seljuk', track:'power', label:'Hanedan', title:'Selçuklular Orta Asya’da', description:'Selçuklular Orta Asya’nın tamamında iktidarı ele geçirir. Siyasi himaye, şehirler ve eğitim kurumları yeni bir çatı altında yeniden düzenlenir.', tags:['Selçuklular','iktidar'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 31', major:true, note:'Selçuklu döneminin genişleme noktası.'},
+      {year:1065, date:'MS 1065', era:'seljuk', track:'knowledge', label:'Kurum', title:'Nizamiye medreseleri', description:'Nizamiye medreseleri Bağdat, Nişabur, Hargerd ve Şiraz gibi merkezlerde kurulur; eğitim, siyasi düzenin kurumsal bir parçası haline gelir.', tags:['medrese','Nizamülmülk'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 31', major:true, note:'Bilgi kurumlarının yaygınlaşması.'},
+      {year:1069, date:'MS 1069', era:'seljuk', track:'culture', label:'Eser', title:'Kutadgu Bilig tamamlanır', description:'Yusuf Has Hacib, Kutadgu Bilig’i tamamlar. Türkçe siyaset ve ahlak düşüncesi, saray ve toplum ilişkilerini tartışan kalıcı bir metne dönüşür.', tags:['Yusuf Has Hacib','Türkçe'], chapter:'Bölüm 10 · Kaşgarlı Mahmut ve Yusuf Has Hacib', page:'s. 31', major:true, note:'Türkçe düşünce dilinin güçlenmesi.'},
+      {year:1077, date:'MS 1077', era:'seljuk', track:'culture', label:'Eser', title:'Divanü Lügati’t-Türk', description:'Kaşgarlı Mahmut, Divanü Lügati’t-Türk’ü tamamlar; Türkî dillerin çeşitliliği ve halkların coğrafyası bir dil atlası gibi kayda geçer.', tags:['Kaşgarlı Mahmut','dil'], chapter:'Bölüm 10 · Kaşgarlı Mahmut ve Yusuf Has Hacib', page:'s. 31', major:true, note:'Dil, coğrafya ve kimlik aynı eserde buluşur.'},
+      {year:1079, date:'MS 1079', era:'seljuk', track:'knowledge', label:'Ölçüm', title:'Celali takvimi', description:'Melikşah ve Nizamülmülk, Ömer Hayyam’ın hazırladığı güneş takvimini sunar. Zamanı ölçmek, yönetimin teknik kapasitesine dönüşür.', tags:['Ömer Hayyam','takvim'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 31', major:true, note:'Bilim ve idare arasındaki bağ.'},
+      {year:1093, date:'MS 1093', era:'seljuk', track:'belief', label:'Kişi / tasavvuf', title:'Ahmed Yesevi doğar', description:'Mutasavvıf Ahmed Yesevi’nin doğumu, Orta Asya’da tasavvufî düşüncenin, dilin ve seyahat eden mürid ağlarının sonraki yüzyıllara uzanan damarını görünür kılar.', tags:['Ahmed Yesevi','tasavvuf'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 32', major:false, note:'Cetvelde bugünkü Kazakistan çevresiyle ilişkilendirilir.'},
+      {year:1118, date:'MS 1118', era:'seljuk', track:'power', label:'Kent / hükümdar', title:'Sultan Sencer Merv’de', description:'Melikşah’ın ölümünün ardından Ahmed Sencer Merv’de iktidarı ele geçirir. Merv bir kez daha siyasi ve kültürel ağırlık merkezi olur.', tags:['Merv','Sencer'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 31', major:true, note:'Merv’in uzun süreli merkezî rolü.'},
+      {year:1127, date:'MS 1127', era:'seljuk', track:'culture', label:'Mimari', title:'Kalyan Minaresi yükselir', description:'Buhara’daki Kalyan Minaresi inşa edilir. Dini mimari, şehir kimliğinin ve siyasi hafızanın kalıcı bir işaretine dönüşür.', tags:['Buhara','mimari'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 31', major:false, note:'Bugün de görülebilen bir tarih katmanı.'},
+      {year:1141, date:'MS 1141', era:'seljuk', track:'power', label:'Savaş', title:'Karahitaylar Selçukluları yener', description:'Karahitaylar, Semerkant’ın kuzeybatısında Selçuklu ordusunu bozguna uğratır. İktidar haritası yeniden hareketlenir.', tags:['Semerkant','Karahitaylar'], chapter:'Bölüm 12 · Selçuklu Kubbesi Altında Çalkantılar', page:'s. 31', major:true, note:'Selçuklu üstünlüğünün kırılma noktası.'},
+      {year:1180, date:'MS 1180?', era:'seljuk', track:'network', label:'Çeviri', title:'Kanun Latinceye geçer', description:'İbn-i Sina’nın Kanun’u Cremonalı Gerard tarafından Latinceye çevrilir; Orta Asya’da üretilen tıp bilgisi Avrupa’daki eğitim dünyasına bağlanır.', tags:['İbn-i Sina','çeviri'], chapter:'Bölüm 9 · Memuniler Döneminde Ürgenç', page:'s. 31', major:true, note:'Tarih cetvelinde yaklaşık.'},
+      {year:1201, date:'MS 1201', era:'seljuk', track:'knowledge', label:'Kişi', title:'Nasirüddin Tusi doğar', description:'Gökbilimci Nasirüddin Tusi doğar; onun çalışmaları, Moğol döneminin yıkımı içinden yeni gözlem ve hesap kurumlarının çıkabileceğini gösterir.', tags:['Tusi','gökbilim'], chapter:'Bölüm 13 · Moğol Asrı', page:'s. 31', major:false, note:'Yaklaşan Moğol dönemiyle tezat oluşturur.'},
+      {year:1207, date:'MS 1207', era:'seljuk', track:'culture', label:'Kişi', title:'Mevlana Celaleddin Rumi', description:'Mevlana Celaleddin Rumi’nin kabul edilen doğum tarihi. Şiir, tasavvuf ve seyahat ağları Orta Asya ile daha geniş İslam dünyası arasında bağ kurar.', tags:['Rumi','tasavvuf'], chapter:'Bölüm 13 · Moğol Asrı', page:'s. 31', major:false, note:'Tarih kabul edilen doğum tarihidir.'},
+      {year:1219, date:'MS 1219', era:'mongol', track:'power', label:'İstila', title:'Moğol istilası başlar', description:'Otrar valisinin bir Moğol kervanını yağmalaması ve elçiyi öldürmesinin ardından Cengiz Han’ın istilası başlar.', tags:['Cengiz Han','Otrar'], chapter:'Bölüm 13 · Moğol Asrı', page:'s. 31', major:true, note:'Kitabın “Moğol Asrı” eşiği.'},
+      {year:1270, date:'MS 1270’ler', era:'mongol', track:'network', label:'Seyahat', title:'Marco Polo’nun doğu yolculukları', description:'Marco Polo, Venedik’ten Pekin’e iki kez seyahat eder. Moğol dünyasının açtığı güzergâhlar Avrupa’nın Orta Asya tasavvurunu etkiler.', tags:['Marco Polo','Pekin'], chapter:'Bölüm 13 · Moğol Asrı', page:'s. 31', major:false, note:'Dolaşım ve anlatı ağının örneği.'},
+      {year:1300, date:'MS 1300’ler', era:'mongol', track:'knowledge', label:'Teknoloji', title:'Doğu Türkistan’da yazı ve matbaa', description:'Doğu Türkistan’da yazılı tabletler ve taşınabilir tarzda matbaacılık görünür; bilginin çoğaltılması için yeni teknik kanallar oluşur.', tags:['matbaa','Doğu Türkistan'], chapter:'Bölüm 13 · Moğol Asrı', page:'s. 32', major:true, note:'Tarih aralığı geniştir.'},
+      {year:1336, date:'MS 1336', era:'mongol', track:'power', label:'Kişi', title:'Timur doğar', description:'Timur’un doğumu, sonraki yüzyılda Semerkant’ı yeniden merkezleştirecek siyasi ve kültürel projenin başlangıç noktasıdır.', tags:['Timur','Semerkant'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 32', major:true, note:'Timurlu döneminin başlangıç eşiği.'},
+      {year:1350, date:'MS 1350’ler', era:'mongol', track:'network', label:'Kriz', title:'Kara Ölüm', description:'Veba, İran ve Kafkasya’da büyük nüfus kaybına yol açar. İktidar ve kültür ağları yalnız savaşlarla değil, demografik şoklarla da yeniden şekillenir.', tags:['veba','demografi'], chapter:'Bölüm 13 · Moğol Asrı', page:'s. 32', major:true, note:'Kültürel ağların kırılganlığı.'},
+      {year:1380, date:'MS 1380', era:'mongol', track:'power', label:'Savaş', title:'Altın Ordu’ya karşı Moskova', description:'Moskova, Moğol Altın Ordu devletini mağlup eder. Avrasya’daki siyasi ağırlık merkezleri yeniden dağılmaya başlar.', tags:['Moskova','Altın Ordu'], chapter:'Bölüm 13 · Moğol Asrı', page:'s. 32', major:false, note:'Kitabın geniş Avrasya bağlamı.'},
+      {year:1402, date:'MS 1402', era:'timurid', track:'power', label:'Savaş', title:'Timur Bayezid’i esir alır', description:'Timur Osmanlı Türklerine saldırır ve Sultan Bayezid’i esir alır. Siyasi güç, Anadolu’dan Orta Asya’ya uzanan bir sahnede yeniden görünür olur.', tags:['Timur','Bayezid'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 32', major:true, note:'Timur’un bölgesel gücünü gösteren dönüm noktası.'},
+      {year:1414, date:'MS 1414', era:'timurid', track:'culture', label:'Kişi', title:'Nureddin Cami doğar', description:'Şair Nureddin Cami doğar. Herat ve Semerkant çevresindeki Timurlu kültürünün şiir, dil ve saray himayesiyle gelişen damarını temsil eder.', tags:['Cami','şiir'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 32', major:false, note:'Timurlu kültür çevresinin temsilcisi.'},
+      {year:1441, date:'MS 1441', era:'timurid', track:'culture', label:'Dil / edebiyat', title:'Ali Şir Nevai doğar', description:'Ali Şir Nevai, Çağataycayı Farsçayla aynı seviyeye taşıyan bir şiir dili kurar. Timurlu Herat’ında çok dilli edebiyat yeni bir güç kazanır.', tags:['Nevai','Çağatayca'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 32', major:true, note:'Dilsel çoğulluğun kültürel ifadesi.'},
+      {year:1449, date:'MS 1449', era:'timurid', track:'knowledge', label:'Kırılma', title:'Uluğ Bey öldürülür', description:'Timurlu hükümdarı ve gökbilimci Uluğ Bey katledilir. Semerkant’taki medrese ve rasathane, iktidarla bilginin ilişkisindeki gerilimi görünür kılar.', tags:['Uluğ Bey','rasathane'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 32', major:true, note:'Bilimsel kurumların siyasi kırılganlığı.'},
+      {year:1450, date:'MS 1450', era:'timurid', track:'culture', label:'Kişi / resim', title:'Kemaleddin Bihzad doğar', description:'Timurlu döneminin ünlü ressamı Kemaleddin Bihzad’ın doğumu, Herat çevresinde minyatür, saray himayesi ve görsel hafızanın güçlendiği kültür ortamına bağlanır.', tags:['Bihzad','minyatür','Herat'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 33', major:false, note:'Cetvelde yaklaşık biyografik tarih.'},
+      {year:1402, date:'MS 1402?', era:'timurid', track:'knowledge', label:'Kişi / gökbilim', title:'Ali Kuşçu doğar', description:'Gökbilimci Ali Kuşçu’nun Semerkant’ta doğumu, Timurlu dünyasında rasathane, medrese ve hareketli bilgin çevrelerinin birbirini beslediği hattı görünür kılar.', tags:['Ali Kuşçu','Semerkant','gökbilim'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 33', major:false, note:'Cetvelde 1402 satırının ardından ayrı yıl tekrarlanmaz; tarih orta kesinliktedir.'},
+      {year:1470, date:'MS 1470', era:'timurid', track:'power', label:'Saray', title:'Hüseyin Baykara Herat’ta', description:'Hüseyin Baykara, 1506’daki ölümüne kadar sürecek Herat hükümdarlığına başlar. Şairler, ressamlar ve bilginler için yeni bir himaye dönemi açılır.', tags:['Herat','himaye'], chapter:'Bölüm 14 · Timurlenk ve Halefleri', page:'s. 32', major:true, note:'Herat’ın kültürel merkez olarak yükselişi.'},
+      {year:1506, date:'MS 1506', era:'timurid', track:'power', label:'Son / geçiş', title:'Timur hanedanlığı yıkılır', description:'Orta Asya’daki Timur hanedanlığı yıkılır. Kitabın tarih cetveli burada kapanırken, bilim, sanat ve dil ağlarının etkisi farklı coğrafyalarda sürer.', tags:['Timurlular','geçiş'], chapter:'Bölüm 14–15 · Timurlenk ve Retrospektif', page:'s. 33', major:true, note:'Cetvelin son büyük eşiği.'}
+    ];
+
+    const trackOverrides = {
+      belief: ['Zerdüşt ve tek tanrılı düşünce', 'Gautama Buddha’nın doğumu', 'Teodor Merv başpiskoposu', 'Memun ve akılcılık sınavları', 'Tirmizli hadis âlimi', 'Mevlana Celaleddin Rumi'],
+      culture: ['Firdevsi’nin doğumu', 'Şehname tamamlanır', 'Kutadgu Bilig tamamlanır', 'Divanü Lügati’t-Türk', 'Kalyan Minaresi yükselir', 'Nureddin Cami doğar', 'Ali Şir Nevai doğar'],
+      city: ['Kentlerin ve ekmeğin ilk düğümleri', 'İpek batıya doğru yol alıyor', 'Bağdat başkent olur', 'Merv halifeliğin başkenti', 'Kara Ölüm'],
+      network: ['İbn-i Sina Ürgenç’e gider', 'Kanun Latinceye geçer', 'Marco Polo’nun doğu yolculukları', 'Nizamiye medreseleri', 'İsmail Samani türbesi', 'Kalyan Minaresi yükselir'],
+      power: ['Talas Savaşı ve kâğıt bilgisi', 'Sultan Sencer Merv’de']
+    };
+    Object.entries(trackOverrides).forEach(([track, titles]) => titles.forEach(title => {
+      const item = events.find(event => event.title === title);
+      if (item) item.track = track;
+    }));
+
+    const trackLabels = {all:'Tümü', power:'Siyasi ve Askeri Tarih', knowledge:'Bilim ve Matematik', belief:'Din ve Felsefe', culture:'Edebiyat ve Sanat', city:'Ekonomi ve Toplum', network:'Kurum/Mimari'};
+    const trackColors = {power:'#a9543c', knowledge:'#3d6f9b', belief:'#b46a82', culture:'#776a9d', city:'#b7834a', network:'#428e89'};
+    const eraLabels = {early:'Önce / 650’ye kadar', conquest:'Fetih ve çeviri', samanid:'Samani / Gazneli', seljuk:'Selçuklu dünyası', mongol:'Moğol asrı', timurid:'Timur ve sonrası'};
+    const eraGroups = [
+      {key:'early', label:'MÖ 3500 — MS 650', start:-3500, end:650, className:'period-early'},
+      {key:'conquest', label:'MS 650 — 900', start:650, end:900, className:'period-conquest'},
+      {key:'samanid', label:'MS 900 — 1040', start:900, end:1040, className:'period-samanid'},
+      {key:'seljuk', label:'MS 1040 — 1219', start:1040, end:1219, className:'period-seljuk'},
+      {key:'mongol', label:'MS 1219 — 1336', start:1219, end:1336, className:'period-mongol'},
+      {key:'timurid', label:'MS 1336 — 1506', start:1336, end:1506, className:'period-timurid'}
+    ];
+    const trackOrder = ['knowledge','belief','culture','city','network','power'];
+    const timeline = document.getElementById('timeline');
+    const timelineScroll = document.getElementById('timelineScroll');
+    const timelineFrame = document.querySelector('.timeline-frame');
+    const overviewTrack = document.getElementById('overviewTrack');
+    const overviewViewport = document.getElementById('overviewViewport');
+    const stickyAxisTrack = document.getElementById('stickyAxisTrack');
+    const search = document.getElementById('search');
+    const era = document.getElementById('era');
+    const pivotalToggle = document.getElementById('pivotalToggle');
+    const resultCount = document.getElementById('resultCount');
+    const emptyState = document.getElementById('emptyState');
+    const axisStatus = document.getElementById('axisStatus');
+    const minYear = -3500;
+    const maxYear = 1506;
+    const baseWidth = 5000;
+    let activeTrack = 'all';
+    let zoomLevel = 1;
+    let visibleEvents = [];
+    let selectedItem = null;
+    let selectedButton = null;
+
+    const eraContexts = {
+      early:'Starr’ın ilk bölümlerde kurduğu çerçevede Orta Asya, imparatorlukların kenarında duran boş bir alan değil; kentleri, tarım ve ticaret ağları, farklı inançları ve hareketli nüfuslarıyla Avrasya’nın merkezidir.',
+      conquest:'Kitabın fetih ve Bağdat bölümleri, askerî istilayı tek başına açıklama olarak bırakmaz. Fetihlerden sonra yerel yöneticiler, diller ve uzmanlıklar yeni idarelerin içine girer; akış doğuya ve batıya doğru yeniden yönlenir.',
+      samanid:'Samani–Gazneli bölümlerinde kültür, saray himayesi ve şehirler üzerinden okunur. Hanedanlar değişse de bilginler, metinler ve zanaatkârlar yeni merkezlere taşınarak süreklilik kurar.',
+      seljuk:'Selçuklu çatısı altında medrese, vezirlik, şiir ve dil kurumlaşır; aynı zamanda aklın sınırları üzerine sert tartışmalar yaşanır. Kitap bu dönemi hem yükseliş hem de entelektüel gerilim olarak anlatır.',
+      mongol:'Moğol asrı kitapta yalnızca bir yıkım parantezi değildir. Kentlerin ve nüfusun ağır darbeye uğramasının ardından zanaatkârlar, bilginler ve güzergâhlar yeni bir siyasi düzen içinde yeniden dolaşıma girer.',
+      timurid:'Timurlu bölümünde kültürel canlanma, Timur’un fetihleri ile başlayan ve ölümünden sonra torunları arasındaki parçalı idare içinde gelişen bir ara dönemde görünür. Semerkant ve Herat bu üretimin iki parlak odağıdır.'
+    };
+    const contextByTitle = {
+      'Kentlerin ve ekmeğin ilk düğümleri':'Kitabın “Dünyanın Merkezi” bölümündeki temel tez burada başlar: Orta Asya’yı belirleyen şey yalnızca bozkır değil, erken kentler ile bunları birbirine bağlayan üretim ve ticaret hatlarıdır.',
+      'Zerdüşt ve tek tanrılı düşünce':'Starr, Zerdüştlüğü daha sonra Hristiyanlık ve İslam içinde yeniden karşılaşılacak hesap günü, cennet-cehennem ve diriliş fikirleriyle ilişkilendirir; dinî düşünceyi bölgesel bir miras zinciri olarak okur.',
+      'Büyük İskender’in Orta Asya seferleri':'Kitap, Helenistik karşılaşmayı yalnızca bir fetih listesi olarak değil, Ay Hanım gibi kentlerde Yunan, İranî ve yerel geleneklerin iç içe geçmesi olarak ele alır.',
+      'Kuşan iktidarı ve Budizm':'Kuşanlar, Hindistan, Afganistan ve Orta Asya arasında dolaşan Budist imgelerin, metinlerin ve tüccarların siyasi himaye bulduğu erken bir bağlantı düzenidir.',
+      'İpek batıya doğru yol alıyor':'İpek, kitapta tek başına bir ürün değil; kent ekonomilerini, kervanları, zanaatları ve haber/teknoloji akışını taşıyan büyük dolaşım sisteminin görünür yüzüdür.',
+      'Son Sasani hükümdarı Merv’de ölür':'Arap fetihleri öncesinde bölge zaten Pers, Yunan, Kuşan, Ak Hun, Çin ve Türk ordularının müdahalelerine alışkındır. Her yeni fatih, yönetimin günlük işlerini çoğu kez yerel güçlere bırakır.',
+      'Arap fetihleri başlıyor':'Kitabın önemli ayrımı şudur: 660’ta başlayan istila yıkım getirir, fakat fetih sonrası idare ve bilgi üretimi yerel şehirlerin, dillerin ve uzmanların katılımıyla bambaşka bir bileşim oluşturur.',
+      'Bağdat başkent olur':'Starr’ın “Bağdat’ta Doğu Rüzgârı” bölümü, Bağdat’ın dokuzuncu yüzyılda entelektüel merkez oluşunu anlatırken kültürel enerjinin önemli bölümünün İranî ve Orta Asyalı kaynaklardan geldiğini vurgular.',
+      'El-Harezmi’nin doğumu':'Kitap Harezmi’yi cebir, algoritma, onluk sistem ve küresel astronomi çizgisinin önemli halkası olarak sunar; matematik, farklı şehirlerdeki gökbilim ve coğrafya çalışmalarıyla birlikte gelişir.',
+      'Ahmed el-Fergani’nin doğumu':'Orta Asyalı gökbilimciler kitapta tekil dehalar değil, yıllar süren ortak gözlem ve hesap çalışmalarına katılan geniş bir araştırmacı topluluğu olarak görünür.',
+      'Merv halifeliğin başkenti':'Bu olay, kitabın tersine çevirdiği merkez–çevre fikrinin açık örneğidir: halifeliğin siyasi merkezi bir süre Merv’e taşınır; doğunun siyasi ve entelektüel rüzgârı Bağdat’a doğru eser.',
+      'Memun ve akılcılık sınavları':'Memun’un kütüphane ve bilim çevresi için Orta Doğu, Hindistan, Çin ve Avrupa arasındaki güzergâhlardan uzman toplaması, kitabın “seyyah âlimler” temasına doğrudan bağlanır.',
+      'İsmail Samani Buhara’da':'Samani siyaseti, Buhara’yı yalnızca bir yönetim merkezi değil, şairlerin, kâtiplerin ve bilim insanlarının himaye bulduğu bir kültür çevresi haline getirir.',
+      'İsmail Samani türbesi':'Buhara’daki türbe, kitabın kültürel sürekliliği mimari üzerinden gösterdiği yapılardan biridir: siyasi hanedan anısı, şehir ölçeğinde kalıcı bir forma dönüşür.',
+      'Firdevsi’nin doğumu':'Firdevsi ve Şehname, geçmişi destanlaştırarak yeni siyasi düzenlerin kendilerini İranî tarih ve hafıza içinde konumlandırmasına yardımcı olan edebî bir damar olarak ele alınır.',
+      'İbn-i Sina doğar':'Starr’ın anlatısında İbn-i Sina, kapalı bir “dâhi” figürü değildir; mektuplaşan, seyahat eden, hükümdarlarla çalışan ve Biruni gibi bilginlerle mantık zemini üzerinde tartışan hareketli bir entelektüeldir.',
+      'Gazneli Mahmut’un yükselişi':'Gazneli Mahmut, fetih ganimetleri ve saray gücüyle aynı zamanda bilginleri kendine çekmek ister. Biruni’nin Harezm’den Gazne’ye taşınması, bilginin himaye ile birlikte zorunlu göç de yaşayabildiğini gösterir.',
+      'Samani hanedanlığının düşüşü':'Samani siyasi düzeninin sona ermesi, kitabın anlatısında bilginin bitişi değildir; çevreler Buhara’dan Gazne’ye, Ürgenç’e ve başka saraylara dağılarak yeni bağlamlarda devam eder.',
+      'İbn-i Sina Ürgenç’e gider':'Bölüm 9, Ürgenç’i bugünkü çöl imgesinin karşısına yerleştirir: Ceyhun’un kolları üzerinden Hazar’a bağlanan, 1004 civarında iç Asya’nın en gelişmiş ve bağlantılı bölgelerinden biridir.',
+      'Şehname tamamlanır':'Şehname’nin tamamlanması, kitapta yazının hükümdarları öven bir süs değil, geçmişi seçip düzenleyerek siyasal ve kültürel kimlik kuran bir bellek aygıtı olduğunu gösterir.',
+      'Memun Akademisi’nin sonu':'Biruni ve diğer bilginlerin Gazne’ye götürülmesi, istilanın yalnız binaları değil, bir kurumun insan kadrosunu da yerinden ettiğini gösterir; kültür, bazen koruma bazen zor kullanma yoluyla taşınır.',
+      'Biruni’nin el-Kanun el-Mesudi’si':'Kitap Biruni’yi astronomi ve matematiğin yanı sıra kültürler arası karşılaştırmanın öncüsü olarak anlatır; Hindistan bilgisi, sıfır ve negatif sayılar gibi kavramlar bu dolaşım içinde anlam kazanır.',
+      'Dandanakan ve Selçuklu yükselişi':'Dandanakan, Gazneli merkezinin zayıflayıp Selçuklu çatısının güçlenmesini sağlar. Yeni iktidar, şehirleri ve bilginleri farklı bir idari himaye altında toplar.',
+      'Nizamiye medreseleri':'Nizamiye, kitabın bilgi kurumları ile iktidar arasındaki çift yönlü ilişkiyi gösterdiği yerdir: medreseler hukuk ve Sünni eğitim için kurulurken, içlerinde mantık ve felsefe üzerine sert tartışmalar da yürür.',
+      'Kutadgu Bilig tamamlanır':'Yusuf Has Hacib’in eseri, Türkçe siyaset ve ahlak düşüncesini hükümdar, danışman, adalet ve toplum ilişkileri üzerinden kuran bir “hükümdar aynası” olarak görünür.',
+      'Divanü Lügati’t-Türk':'Kaşgarlı Mahmut’un Sincan’dan Bağdat’a uzanan hareketi, İslam, Budizm ve göçebe inançların kesiştiği bir dünyayı dil üzerinden kayda geçirir; eser aynı zamanda halklar ve coğrafyalar için bir haritadır.',
+      'Celali takvimi':'Ömer Hayyam’ın takvimi, soyut bir matematik başarısından fazlasıdır; kitapta gökyüzünü ölçme, zamanı düzenleme ve devletin idari kapasitesini aynı düzlemde buluşturan bir kurum teknolojisi olarak okunur.',
+      'Kanun Latinceye geçer':'İbn-i Sina’nın Kanun’u, Orta Asya’da üretilen tıp bilgisinin çeviri ağlarıyla Avrupa’daki eğitim dünyasına geçtiğini gösterir; bir metnin etkisi, yazıldığı şehirle sınırlı kalmaz.',
+      'Moğol istilası başlar':'Bölüm 13, Otrar kuşatmasını ve sivil katliamını ayrıntılı bir kırılma olarak verir. Bununla birlikte kitap, kültürel hareketliliğin 1219’da bir anda yok olmadığını; yeni siyasi düzenlerde farklı biçimlerde sürdüğünü de hatırlatır.',
+      'Marco Polo’nun doğu yolculukları':'Marco Polo’nun güzergâhı, Moğol döneminde siyasi hâkimiyetin kervan yollarını ve Avrupa’nın doğu hakkındaki anlatılarını nasıl etkilediğini gösteren dışarıdan bir bakış noktasıdır.',
+      'Doğu Türkistan’da yazı ve matbaa':'Yazılı tabletler ve taşınabilir baskı teknikleri, kitabın temel sorusunu teknik bir düzleme taşır: bilgi yalnız kimlerin bildiğiyle değil, ne kadar kolay çoğaltılabildiğiyle de yayılır.',
+      'Timur doğar':'Starr, Timur’un kültürel canlanmasını fetihlerinden ayrı düşünmez. Gazneli Mahmut, ilk Selçuklular ve Cengiz Han gibi o da şiddetli bir siyasi zincir üzerinden kendi kültürel projesini kurar.',
+      'Kara Ölüm':'Veba, kitapta fikirlerin ve kurumların taşıyıcıları olan kentleri demografik açıdan sarsan bir arka plan kuvvetidir; kültür tarihi yalnız saray ve bilginlerden ibaret değildir.',
+      'Timur Bayezid’i esir alır':'Timur’un Anadolu’ya uzanan seferi, Orta Asya merkezli gücün sınırlarını gösterir; fakat kitap onun mirasını yalnız askerî başarıyla değil, sonrasında oluşan kültür çevresiyle değerlendirir.',
+      'Ali Şir Nevai doğar':'Nevai, Timurlu Herat’ında Çağataycayı Farsçayla yarışabilecek bir edebiyat dili haline getirir; çok dilli şehir hayatı tek bir “saray dili”ne indirgenmez.',
+      'Uluğ Bey öldürülür':'Uluğ Bey’in yıldız yılını ve eksen eğikliğini son derece isabetli hesaplayan bir gökbilimci olarak anlatılması, bilginin hükümdarlıkla birleşebileceğini; öldürülmesi ise bu birleşimin ne kadar kırılgan olduğunu gösterir.',
+      'Hüseyin Baykara Herat’ta':'Herat, kitabın son kültürel patlamasında şairleri, kâtipleri ve ressamları bir araya getiren himaye merkezi olur. Bihzad gibi sanatçılar bu çevrenin görsel hafızasını kurar.',
+      'Baktriya devesi taşımacılığa katılır':'Baktriya devesi, erken kentleri ve uzun mesafeli kervanları birbirine bağlayan maddi altyapının parçasıdır; kitapta ticaretin yalnız mallardan değil, taşıma teknolojilerinden de oluştuğu görülür.',
+      'Muhammed’in doğumu':'Cetveldeki bu biyografik düğüm, Orta Asya fetihlerinden önce İslam dünyasının oluştuğu tarihsel bağlamı kurar; sonraki dönüşümü yalnızca askerî bir olay olarak okumamayı sağlar.',
+      'Muhammed el-Buhari doğar':'Buhari’nin Tirmiz ve diğer şehirlerle birlikte anılması, Orta Asya’nın hadis ve dinî hafıza üretiminde merkezî bir coğrafya olduğunu gösterir.',
+      'el-Razi doğar':'Razi, tıp bilgisini gözlem, deneyim ve farklı şehirlerdeki bilgin çevreleriyle ilişkilendiren hezarfen figür olarak bilim hattını tamamlar.',
+      'Farabi doğar':'Farabi’nin mantık ve siyaset felsefesi, Orta Asya’dan çıkan bilginlerin yalnızca teknik bilimlerde değil, düşüncenin kavramsal kurumlarında da etkili olduğunu gösterir.',
+      'Biruni ve İbn-i Sina mektuplaşır':'Bu yazışma, aynı dönemde yaşayan bilginlerin tek bir saraya kapalı olmadığını; soruların, itirazların ve yöntemlerin mektuplaşma ağlarıyla dolaştığını gösterir.',
+      'Ömer Hayyam doğar':'Hayyam’ın şiir, matematik ve gökbilim arasında hareket etmesi, kitapta “bilim insanı” ile “edebiyatçı” ayrımının modern anlamda keskin olmadığını hatırlatır.',
+      'Ahmed Yesevi doğar':'Yesevi’nin doğumu, tasavvufun şehirler, diller ve hareketli mürid ağları üzerinden Orta Asya’da kök saldığı uzun çizginin başlangıç işaretidir.',
+      'Kemaleddin Bihzad doğar':'Bihzad, Herat çevresindeki saray himayesinin yalnız şair ve bilginleri değil, görsel anlatı ve minyatür ustalarını da bir araya getirdiğini görünür kılar.',
+      'Ali Kuşçu doğar':'Ali Kuşçu, Semerkant’taki rasathane ve medrese çevresinin Timurlu sonrası coğrafyalara taşınan bilimsel mirasının devam halkasıdır.',
+      'Timur hanedanlığı yıkılır':'Kitabın retrospektifinde siyasi hanedanların ömrü ile kültürel etkiler birbirinden ayrılır: Timur hanedanı yıkılsa da Semerkant, Herat, dil, bilim ve sanat çevrelerinin ürettiği miras başka yerlere taşınır.'
+    };
+    function getContext(item) { return contextByTitle[item.title] || eraContexts[item.era]; }
+
+    function yearToX(year, width) { return ((year - minYear) / (maxYear - minYear)) * width; }
+    function formatTick(year) { return year < 0 ? 'MÖ ' + Math.abs(year) : year === 0 ? '' : 'MS ' + year; }
+    function tickStep() { return zoomLevel === 1 ? 500 : zoomLevel === 2 ? 250 : zoomLevel === 4 ? 100 : 25; }
+    function eventMatches(item) {
+      const query = search.value.trim().toLocaleLowerCase('tr-TR');
+      const haystack = [item.title, item.description, item.tags.join(' '), item.chapter, item.label].join(' ').toLocaleLowerCase('tr-TR');
+      return (!query || haystack.includes(query)) && (era.value === 'all' || item.era === era.value) && (activeTrack === 'all' || item.track === activeTrack) && (!pivotalToggle.checked || item.major);
+    }
+
+    function makeAxis(width) {
+      const axis = document.createElement('div');
+      axis.className = 'axis-row';
+      axis.innerHTML = '<span class="axis-title">Zaman ekseni · tarihler yaklaşık</span>';
+      const step = tickStep();
+      for (let year = minYear; year <= maxYear; year += step) {
+        if (year === 0) continue;
+        const tick = document.createElement('span');
+        tick.className = 'axis-tick';
+        tick.style.left = yearToX(year, width) + 'px';
+        tick.textContent = formatTick(year);
+        axis.appendChild(tick);
+      }
+      return axis;
+    }
+
+    function makePeriodBands(width) {
+      const layer = document.createDocumentFragment();
+      eraGroups.forEach(group => {
+        const band = document.createElement('div');
+        band.className = 'period-band ' + group.className;
+        band.style.left = yearToX(group.start, width) + 'px';
+        band.style.width = (yearToX(group.end, width) - yearToX(group.start, width)) + 'px';
+        band.innerHTML = '<span>' + group.label + '</span>';
+        layer.appendChild(band);
+      });
+      return layer;
+    }
+
+    function syncOverview() {
+      const total = timelineScroll.scrollWidth;
+      const viewport = timelineScroll.clientWidth;
+      const width = Math.max(8, Math.min(100, (viewport / total) * 100));
+      const maxScroll = Math.max(1, total - viewport);
+      const left = (timelineScroll.scrollLeft / maxScroll) * (100 - width);
+      overviewViewport.style.width = width + '%';
+      overviewViewport.style.left = left + '%';
+    }
+
+    function syncStickyAxis() {
+      if (stickyAxisTrack) stickyAxisTrack.style.transform = 'translate3d(' + (-timelineScroll.scrollLeft) + 'px, 0, 0)';
+    }
+
+    function scrollToYear(year) {
+      const target = yearToX(year, baseWidth * zoomLevel) - (timelineScroll.clientWidth / 2);
+      timelineScroll.scrollTo({left: Math.max(0, Math.min(target, timelineScroll.scrollWidth - timelineScroll.clientWidth)), behavior:'smooth'});
+    }
+
+    function renderOverview() {
+      overviewTrack.querySelectorAll('.overview-era, .overview-event').forEach(node => node.remove());
+      eraGroups.forEach(group => {
+        const band = document.createElement('span');
+        band.className = 'overview-era ' + group.className;
+        band.style.left = ((group.start - minYear) / (maxYear - minYear) * 100) + '%';
+        band.style.width = ((group.end - group.start) / (maxYear - minYear) * 100) + '%';
+        overviewTrack.appendChild(band);
+      });
+      events.forEach(item => {
+        const mark = document.createElement('span');
+        mark.className = 'overview-event';
+        mark.style.left = ((item.year - minYear) / (maxYear - minYear) * 100) + '%';
+        mark.style.setProperty('--overview-color', trackColors[item.track]);
+        mark.title = item.title + ' · ' + item.date;
+        overviewTrack.appendChild(mark);
+      });
+      syncOverview();
+    }
+
+    function render() {
+      const width = baseWidth * zoomLevel;
+      const trailingPadding = 360;
+      const boardWidth = width + trailingPadding;
+      visibleEvents = events.filter(eventMatches).sort((a, b) => a.year - b.year);
+      timeline.innerHTML = '';
+      timeline.style.width = boardWidth + 'px';
+      timeline.dataset.zoom = zoomLevel;
+      timeline.appendChild(makePeriodBands(width));
+      timeline.appendChild(makeAxis(width));
+      if (stickyAxisTrack) {
+        stickyAxisTrack.innerHTML = '';
+        stickyAxisTrack.style.width = boardWidth + 'px';
+        stickyAxisTrack.appendChild(makeAxis(width));
+      }
+
+      const byTrack = Object.fromEntries(trackOrder.map(track => [track, visibleEvents.filter(item => item.track === track)]));
+      const layouts = {};
+      trackOrder.forEach(track => {
+        const occupied = [];
+        const items = byTrack[track].map(item => {
+          const x = yearToX(item.year, width);
+          let sub = 0;
+          while (occupied.some(previous => previous.sub === sub && Math.abs(previous.x - x) < 205)) sub += 1;
+          occupied.push({x, sub});
+          return {item, x, sub};
+        });
+        const laneHeight = Math.max(170, 34 + (Math.max(1, ...items.map(entry => entry.sub + 1)) * 82));
+        layouts[track] = {items, laneHeight};
+      });
+      const axisHeight = 58;
+      let laneTop = axisHeight;
+      trackOrder.forEach(track => {
+        const lane = document.createElement('div');
+        const layout = layouts[track];
+        lane.className = 'track-lane lane-' + track + (layout.items.length ? '' : ' dimmed');
+        lane.style.top = laneTop + 'px';
+        lane.style.height = layout.laneHeight + 'px';
+        layout.items.forEach(({item, x, sub}) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'timeline-event ' + (item.major ? 'major ' : '') + 'sub-' + sub;
+          button.dataset.eventIndex = events.indexOf(item);
+          button.style.left = x + 'px';
+          button.style.setProperty('--event-color', trackColors[item.track]);
+          button.innerHTML = '<span class="event-mark" aria-hidden="true"></span><span class="event-label"><strong>' + item.title + '</strong><small>' + item.date + ' · ' + item.page + ' · ' + item.label + '</small><p>' + item.description + '</p></span>';
+          button.addEventListener('click', () => openModal(item, button));
+          lane.appendChild(button);
+        });
+        timeline.appendChild(lane);
+        const rail = document.querySelector('[data-rail="' + track + '"]');
+        if (rail) {
+          rail.classList.toggle('dimmed', activeTrack !== 'all' && activeTrack !== track);
+          rail.style.height = layout.laneHeight + 'px';
+        }
+        laneTop += layout.laneHeight;
+      });
+      const totalHeight = laneTop;
+      timelineFrame.style.height = totalHeight + 'px';
+      timeline.style.height = totalHeight + 'px';
+      const railCap = document.querySelector('.rail-cap');
+      if (railCap) railCap.style.height = axisHeight + 'px';
+
+      resultCount.textContent = visibleEvents.length + ' / ' + events.length;
+      emptyState.classList.toggle('show', visibleEvents.length === 0);
+      axisStatus.textContent = 'MÖ 3500 — MS 1506 · ' + zoomLevel + '× ' + (zoomLevel === 1 ? 'genel görünüm' : 'yakın görünüm');
+      document.querySelectorAll('.zoom-btn').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.zoom) === zoomLevel));
+      renderOverview();
+      syncStickyAxis();
+      if (selectedItem && !visibleEvents.includes(selectedItem)) closeModal();
+    }
+
+    function scrollToEra(key) {
+      const group = eraGroups.find(item => item.key === key);
+      if (!group) { timelineScroll.scrollLeft = 0; return; }
+      timelineScroll.scrollTo({left: Math.max(0, yearToX(group.start, baseWidth * zoomLevel) - 18), behavior:'smooth'});
+    }
+    function openModal(item, button) {
+      if (selectedButton) selectedButton.classList.remove('selected');
+      selectedItem = item; selectedButton = button || document.querySelector('[data-event-index="' + events.indexOf(item) + '"]');
+      if (selectedButton) selectedButton.classList.add('selected');
+      document.getElementById('modalMeta').textContent = item.date + ' · ' + item.label;
+      document.getElementById('modalPage').textContent = item.page;
+      document.getElementById('modalTitle').textContent = item.title;
+      document.getElementById('modalDescription').textContent = item.description;
+      document.getElementById('modalContext').textContent = getContext(item);
+      document.getElementById('modalTrack').textContent = trackLabels[item.track];
+      document.getElementById('modalEra').textContent = eraLabels[item.era];
+      document.getElementById('modalChapter').textContent = item.chapter;
+      document.getElementById('modalNote').textContent = item.note;
+      const backdrop = document.getElementById('modalBackdrop');
+      backdrop.hidden = false;
+      backdrop.classList.add('open');
+      document.getElementById('modalClose').focus();
+    }
+    function closeModal() {
+      const backdrop = document.getElementById('modalBackdrop');
+      backdrop.classList.remove('open');
+      backdrop.hidden = true;
+      if (selectedButton) selectedButton.classList.remove('selected');
+      selectedItem = null; selectedButton = null;
+    }
+    function moveSelection(direction) {
+      if (!selectedItem) return;
+      const index = visibleEvents.indexOf(selectedItem);
+      const next = visibleEvents[index + direction];
+      if (!next) return;
+      const nextButton = document.querySelector('[data-event-index="' + events.indexOf(next) + '"]');
+      if (nextButton) { nextButton.focus(); nextButton.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'}); }
+      openModal(next, nextButton);
+    }
+    function resetFilters() {
+      search.value = ''; era.value = 'all'; pivotalToggle.checked = false; activeTrack = 'all'; zoomLevel = 1;
+      document.querySelectorAll('.filter-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.filter === 'all'));
+      render(); timelineScroll.scrollLeft = 0;
+    }
+
+    let boardPan = null;
+    function stopBoardPan(event) {
+      if (!boardPan) return;
+      if (event && timelineScroll.hasPointerCapture(event.pointerId)) timelineScroll.releasePointerCapture(event.pointerId);
+      timelineScroll.classList.remove('is-dragging');
+      boardPan = null;
+    }
+    timelineScroll.addEventListener('pointerdown', event => {
+      if (event.button !== undefined && event.button !== 0) return;
+      if (event.target.closest('.timeline-event, button, input, select, a')) return;
+      boardPan = {x: event.clientX, y: event.clientY, moved: false};
+      timelineScroll.classList.add('is-dragging');
+      try { timelineScroll.setPointerCapture(event.pointerId); } catch (error) { /* synthetic events may not own a capturable pointer */ }
+    });
+    timelineScroll.addEventListener('pointermove', event => {
+      if (!boardPan) return;
+      const dx = event.clientX - boardPan.x;
+      const dy = event.clientY - boardPan.y;
+      boardPan.x = event.clientX;
+      boardPan.y = event.clientY;
+      if (Math.abs(dx) + Math.abs(dy) < 2 && !boardPan.moved) return;
+      boardPan.moved = true;
+      event.preventDefault();
+      timelineScroll.scrollLeft -= dx * 1.15;
+      window.scrollBy(0, -dy * 1.15);
+    });
+    timelineScroll.addEventListener('pointerup', stopBoardPan);
+    timelineScroll.addEventListener('pointercancel', stopBoardPan);
+    timelineScroll.addEventListener('lostpointercapture', () => {
+      timelineScroll.classList.remove('is-dragging');
+      boardPan = null;
+    });
+
+    document.querySelectorAll('.filter-tab').forEach(btn => btn.addEventListener('click', () => {
+      activeTrack = btn.dataset.filter;
+      document.querySelectorAll('.filter-tab').forEach(item => item.classList.toggle('active', item === btn));
+      render();
+    }));
+    document.querySelectorAll('.zoom-btn').forEach(btn => btn.addEventListener('click', () => { zoomLevel = Number(btn.dataset.zoom); render(); }));
+    search.addEventListener('input', render);
+    era.addEventListener('change', () => { render(); scrollToEra(era.value); });
+    pivotalToggle.addEventListener('change', render);
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalBackdrop').addEventListener('click', event => { if (event.target.id === 'modalBackdrop') closeModal(); });
+    timelineScroll.addEventListener('wheel', event => { if (event.shiftKey) { event.preventDefault(); timelineScroll.scrollLeft += event.deltaY; } }, {passive:false});
+    timelineScroll.addEventListener('scroll', () => { syncOverview(); syncStickyAxis(); }, {passive:true});
+    overviewTrack.addEventListener('click', event => {
+      const rect = overviewTrack.getBoundingClientRect();
+      let fraction = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      if (fraction < 0.015) fraction = 0;
+      if (fraction > 0.985) fraction = 1;
+      timelineScroll.scrollTo({left: fraction * (timelineScroll.scrollWidth - timelineScroll.clientWidth), behavior:'smooth'});
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeModal();
+      if (document.getElementById('modalBackdrop').classList.contains('open') && event.key === 'ArrowLeft') { event.preventDefault(); moveSelection(-1); }
+      if (document.getElementById('modalBackdrop').classList.contains('open') && event.key === 'ArrowRight') { event.preventDefault(); moveSelection(1); }
+    });
+    render();
+  </script>
+</body>
+</html>
