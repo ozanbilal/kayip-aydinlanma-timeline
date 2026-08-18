@@ -283,6 +283,7 @@
     .power-dot { background: #e17a54; }.knowledge-dot { background: #79a8d4; }.culture-dot { background: #bca2d1; }.network-dot { background: #74b7a3; }
     .timeline-scroll { flex: 1 1 auto; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-color: var(--rust) #d5d1c8; scrollbar-width: auto; outline: none; background: #f5f1e7; cursor: grab; touch-action: none; }
     .timeline-scroll.is-dragging { cursor: grabbing; user-select: none; }
+    html.is-pan-animating { scroll-behavior: auto; }
     .timeline-event { touch-action: manipulation; }
     .timeline-scroll:focus-visible { box-shadow: inset 0 0 0 3px rgba(197,139,72,.7); }
     .timeline-scroll::-webkit-scrollbar { height: 14px; }.timeline-scroll::-webkit-scrollbar-track { background: #d9d4c9; }.timeline-scroll::-webkit-scrollbar-thumb { background: var(--rust); border: 3px solid #d9d4c9; border-radius: 20px; }
@@ -973,16 +974,58 @@
     }
 
     let boardPan = null;
+    let momentumFrame = null;
+    const reducePanMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function stopBoardMomentum() {
+      if (momentumFrame !== null) cancelAnimationFrame(momentumFrame);
+      momentumFrame = null;
+    }
+    function startBoardMomentum(velocityX, velocityY) {
+      if (reducePanMotion || (Math.abs(velocityX) < .2 && Math.abs(velocityY) < .2)) {
+        document.documentElement.classList.remove('is-pan-animating');
+        return;
+      }
+      let previousTime = performance.now();
+      momentumFrame = requestAnimationFrame(function step(now) {
+        const frameScale = Math.min(2, Math.max(.5, (now - previousTime) / 16.67));
+        previousTime = now;
+        const maxX = Math.max(0, timelineScroll.scrollWidth - timelineScroll.clientWidth);
+        const nextX = Math.max(0, Math.min(maxX, timelineScroll.scrollLeft + velocityX * frameScale));
+        if (nextX === 0 || nextX === maxX) velocityX = 0;
+        timelineScroll.scrollLeft = nextX;
+
+        const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        const nextY = Math.max(0, Math.min(maxY, window.scrollY + velocityY * frameScale));
+        if (nextY === 0 || nextY === maxY) velocityY = 0;
+        window.scrollTo(0, nextY);
+
+        velocityX *= Math.pow(.9, frameScale);
+        velocityY *= Math.pow(.9, frameScale);
+        if (Math.abs(velocityX) < .2 && Math.abs(velocityY) < .2) {
+          stopBoardMomentum();
+          document.documentElement.classList.remove('is-pan-animating');
+          return;
+        }
+        momentumFrame = requestAnimationFrame(step);
+      });
+    }
     function stopBoardPan(event) {
       if (!boardPan) return;
-      if (event && timelineScroll.hasPointerCapture(event.pointerId)) timelineScroll.releasePointerCapture(event.pointerId);
-      timelineScroll.classList.remove('is-dragging');
+      const shouldMomentum = event && event.type === 'pointerup' && boardPan.moved;
+      const velocityX = boardPan.vx;
+      const velocityY = boardPan.vy;
       boardPan = null;
+      timelineScroll.classList.remove('is-dragging');
+      if (shouldMomentum) startBoardMomentum(velocityX, velocityY);
+      else { stopBoardMomentum(); document.documentElement.classList.remove('is-pan-animating'); }
+      if (event && timelineScroll.hasPointerCapture(event.pointerId)) timelineScroll.releasePointerCapture(event.pointerId);
     }
     timelineScroll.addEventListener('pointerdown', event => {
       if (event.button !== undefined && event.button !== 0) return;
       if (event.target.closest('.timeline-event, button, input, select, a')) return;
-      boardPan = {x: event.clientX, y: event.clientY, moved: false};
+      stopBoardMomentum();
+      document.documentElement.classList.add('is-pan-animating');
+      boardPan = {x: event.clientX, y: event.clientY, lastTime: performance.now(), vx: 0, vy: 0, moved: false};
       timelineScroll.classList.add('is-dragging');
       try { timelineScroll.setPointerCapture(event.pointerId); } catch (error) { /* synthetic events may not own a capturable pointer */ }
     });
@@ -990,19 +1033,30 @@
       if (!boardPan) return;
       const dx = event.clientX - boardPan.x;
       const dy = event.clientY - boardPan.y;
+      const now = performance.now();
+      const elapsed = Math.max(8, now - boardPan.lastTime);
       boardPan.x = event.clientX;
       boardPan.y = event.clientY;
+      boardPan.lastTime = now;
       if (Math.abs(dx) + Math.abs(dy) < 2 && !boardPan.moved) return;
       boardPan.moved = true;
       event.preventDefault();
       timelineScroll.scrollLeft -= dx * 1.15;
       window.scrollBy(0, -dy * 1.15);
+      const velocityX = (-dx * 1.15) * (16.67 / elapsed);
+      const velocityY = (-dy * 1.15) * (16.67 / elapsed);
+      boardPan.vx = Math.max(-48, Math.min(48, boardPan.vx * .72 + velocityX * .28));
+      boardPan.vy = Math.max(-48, Math.min(48, boardPan.vy * .72 + velocityY * .28));
     });
     timelineScroll.addEventListener('pointerup', stopBoardPan);
     timelineScroll.addEventListener('pointercancel', stopBoardPan);
     timelineScroll.addEventListener('lostpointercapture', () => {
       timelineScroll.classList.remove('is-dragging');
-      boardPan = null;
+      if (boardPan) {
+        boardPan = null;
+        stopBoardMomentum();
+        document.documentElement.classList.remove('is-pan-animating');
+      }
     });
 
     document.querySelectorAll('.filter-tab').forEach(btn => btn.addEventListener('click', () => {
