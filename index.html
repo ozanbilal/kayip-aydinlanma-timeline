@@ -382,6 +382,9 @@
     .modal-context-block { margin: 19px 0 0; padding-top: 15px; border-top: 1px solid var(--line); }
     .modal-context-kicker { color: var(--rust); font: 700 .61rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
     .modal-context-block p { margin: 7px 0 0; color: var(--ink); font-size: .87rem; line-height: 1.55; }
+    .modal-book-block { margin-top: 16px; padding: 14px 15px 15px; border: 1px solid rgba(197,139,72,.35); background: rgba(255,250,240,.72); }
+    .modal-book-block .modal-context-kicker { color: var(--gold); }
+    .modal-book-ref { display: block; margin-top: 9px; color: var(--ink-soft); font: 600 .62rem/1.35 var(--mono); letter-spacing: .04em; }
 
     @media (max-width: 1100px) {
       .timeline-tools { grid-template-columns: 1fr 1fr 2fr; }
@@ -614,7 +617,7 @@
     </section>
 
     <section class="footer-note">
-      <p><strong>Nasıl okunmalı?</strong> Yatay mesafe tarihsel uzaklığı temsil eder; sıkışan dönemlerde yakınlaştırma düğmelerini kullanın. Olayın tam bağlamı için başlığı seçin.</p>
+      <p><strong>Nasıl okunmalı?</strong> Yatay mesafe tarihsel uzaklığı temsil eder; sıkışan dönemlerde yakınlaştırma düğmelerini kullanın. Cetvel notu ve kitaptan derinleşme için başlığı seçin.</p>
       <p><strong>Kaynak</strong> S. Frederick Starr, <em>Kayıp Aydınlanma: Arap Fetihlerinden Timur'a Orta Asya'nın Altın Çağı</em>, Yusuf Selman İnanç çevirisi, Kronik Kitap, 4. baskı, İstanbul, 2020. <a href="https://drive.google.com/file/d/1GmKarej2dQLxvXKCgmihKg8MRY2n8gwG/view?usp=drivesdk" target="_blank" rel="noopener">Drive’daki PDF ↗</a></p>
     </section>
   </main>
@@ -625,7 +628,8 @@
       <div class="card-meta"><span id="modalMeta"></span><span class="page-ref" id="modalPage"></span></div>
       <h2 id="modalTitle"></h2>
       <p id="modalDescription"></p>
-      <div class="modal-context-block"><span class="modal-context-kicker">Kitaptaki bağlam</span><p id="modalContext"></p></div>
+      <div class="modal-context-block"><span class="modal-context-kicker">Cetveldeki bağlam</span><p id="modalContext"></p></div>
+      <div class="modal-context-block modal-book-block"><span class="modal-context-kicker">Kitaptan derinleşme</span><p id="modalBookLens"></p><small class="modal-book-ref" id="modalBookRef"></small></div>
       <div class="modal-detail">
         <div><strong>İzlek</strong><span id="modalTrack"></span></div>
         <div><strong>Dönem</strong><span id="modalEra"></span></div>
@@ -812,7 +816,91 @@
       'Ali Kuşçu doğar':'Ali Kuşçu, Semerkant’taki rasathane ve medrese çevresinin Timurlu sonrası coğrafyalara taşınan bilimsel mirasının devam halkasıdır.',
       'Timur hanedanlığı yıkılır':'Kitabın retrospektifinde siyasi hanedanların ömrü ile kültürel etkiler birbirinden ayrılır: Timur hanedanı yıkılsa da Semerkant, Herat, dil, bilim ve sanat çevrelerinin ürettiği miras başka yerlere taşınır.'
     };
+    const bookLensByTitle = {
+      'Kentlerin ve ekmeğin ilk düğümleri':'Starr’ın çerçevesinde Orta Asya, medeniyetlerin kenarında duran boş bir arazi değildir. Kitabın daha ilk bölümünde kent, tarım, maden ve kervan yolları birlikte düşünülür; ileride ortaya çıkacak bilimsel canlılığın maddi zemini bu erken bağlantılardır.',
+      'Zerdüşt ve tek tanrılı düşünce':'Starr, Zerdüştlüğü sonraki dinlerin basit bir “kaynağı” gibi sunmaz. Daha çok hesap günü, diriliş ve kozmik mücadele gibi soruların farklı topluluklar arasında dolaştığı bir düşünce çevresi olarak ele alır; Orta Asya’nın dinî tarihi bu yüzden tek çizgili değildir.',
+      'Büyük İskender’in Orta Asya seferleri':'Bu sefer, kitapta yalnızca bir fatihin ilerleyişi değildir. İskender’in gelişiyle Yunan, İranî, Hint ve yerel unsurların temas ettiği kentler oluşur; kültür, istiladan sonra bile karşılaşmaların bileşkesi olarak yaşamaya devam eder.',
+      'Kuşan iktidarı ve Budizm':'Kuşanlar, Budizm’in Orta Asya’dan Hindistan’a ve Çin’e taşınmasında siyasi koruma kadar tüccarların, keşişlerin ve çevirmenlerin hareketini de mümkün kılar. Starr’ın anlatısında inançlar, kapalı ulusal alanlarda değil, güzergâhlarda güç kazanır.',
+      'İpek batıya doğru yol alıyor':'İpek Yolu’nu kitapta yalnızca bir malın rotası olarak okumamak gerekir. Kervanlar aynı anda para, zanaat, haber, teknik ve dil taşır; şehirlerin büyümesi de bu çok katmanlı dolaşımın ürünüdür.',
+      'Arap fetihleri başlıyor':'Starr’ın en önemli ayrımlarından biri burada görünür: Fetih yaklaşık bir yüzyıla yayılan askerî bir mücadeledir; İslamlaşma ise daha uzun sürer. Yerel yöneticiler, diller ve şehir uzmanlıkları yeni düzenin içine girerek dönüşümü birlikte biçimlendirir.',
+      'Talas Savaşı ve kâğıt bilgisi':'Talas’ı tek başına “kâğıdın icadı” hikâyesine indirgemek kitabın yaklaşımını daraltır. Önemli olan, askerî karşılaşmanın Orta Asya’daki yazı, zanaat ve bilgi dolaşımını Bağdat’a uzanan yeni bir ağla ilişkilendirmesidir.',
+      'Bağdat başkent olur':'“Bağdat’ta Doğu Rüzgârı” bölümünün tezi, Abbasi yükselişinin yalnızca Arap dehasıyla açıklanamayacağıdır. İranî ve Orta Asyalı bilginler, çevirmenler ve yöneticiler Bağdat’ın entelektüel kurumlarını besler; merkez, doğudan gelen katkılarla kurulur.',
+      'Memun ve akılcılık sınavları':'Memun’un çevresi, bilgiyi bir saray kütüphanesine kapatmaz; Hindistan’dan Çin’e, Avrupa’dan Orta Doğu’ya uzanan güzergâhlardan uzman toplar. Starr’ın “seyyah âlimler” fikri burada somutlaşır: yöntemler ve sorular insanlarla birlikte hareket eder.',
+      'Muhammed el-Buhari doğar':'Starr’ın Buhârî anlatısında hadis derlemek, yalnızca çok sayıda rivayeti bir araya getirmek değildir. Buhârî yıllarca seyahat eder, binlerce aktarıcıyı sorgular ve sözlü hafızayı yazılı bir otorite düzenine dönüştürür; Orta Asya şehirleri bu epistemik emeğin merkezlerindendir.',
+      'İsmail Samani Buhara’da':'Samani dönemi, Starr’ın anlatısında siyasi istikrar ile kültürel üretimin birbirini beslediği bir laboratuvardır. Buhara’da saray, şairi ve bilginleri himaye ederken şehir de Farsça edebiyatın, bilimsel çalışmanın ve çok kültürlü dolaşımın taşıyıcısı olur.',
+      'İsmail Samani türbesi':'Türbe, kitapta yalnızca bir hanedan mezarı olarak kalmaz. Tuğla örgüsüyle şehir hafızasını maddileştirir; siyasi bir dönemin, mimari bir dil ve daha uzun süreli bir estetik miras içinde yaşayabildiğini gösterir.',
+      'İbn-i Sina doğar':'Kitabın açılışında İbn-i Sina ile Biruni’nin soruları, Orta Asya Aydınlanması’nın bir “tek dâhi” masalı olmadığını anlatır. İbn-i Sina seyahat eden, yazışan, hükümdarlarla pazarlık eden ve gözlem ile aklı birlikte kullanan hareketli bir bilgi ağının parçasıdır.',
+      'Gazneli Mahmut’un yükselişi':'Gazneli Mahmut’un sarayı bilginleri korur ama bu koruma iktidarın zoruyla iç içedir. Biruni’nin Harezm’den Gazne’ye taşınması, kültürün bazen gönüllü himaye, bazen de fetih ve zorunlu yer değiştirme yoluyla yeni merkeze aktarıldığını gösterir.',
+      'Biruni ve İbn-i Sina mektuplaşır':'Bu yazışma, Starr’ın bilim anlayışındaki en canlı örneklerden biridir: Bilginler birbirlerinin sonuçlarını tartışır, itiraz eder ve kavramları mektup üzerinden sınar. Bilgi tek bir medresenin ya da sarayın mülkü değil, dolaşımdaki bir ortak çalışmadır.',
+      'İbn-i Sina Ürgenç’e gider':'Ürgenç bölümü, bugünkü çöl imgesini tersine çevirir. Ceyhun kolları ve Hazar bağlantısı sayesinde Memuniler dönemi Ürgenç’i yoğun ticaretin, saray himayesinin ve farklı uzmanlıkların kesiştiği canlı bir kent olarak resmedilir.',
+      'Şehname tamamlanır':'Şehname, Starr’da geçmişi sadece koruyan bir edebiyat eseri değildir; geçmişi seçip düzenleyerek hükümdarlık ve toplum için bir kimlik dili kurar. Yazı, siyasi gücün övgüsü kadar ortak hafızanın nasıl inşa edildiğini de gösterir.',
+      'Memun Akademisi’nin sonu':'Ürgenç’in yağmalanmasıyla kaybolan şey yalnızca bir bina değildir. Bilginlerin, kütüphanelerin ve çalışma düzenlerinin birlikte yerinden edilmesi, kurumların kişilere ve siyasi korumaya ne kadar bağlı olduğunu gösterir; yine de insanlar ve metinler başka merkezlerde iz bırakır.',
+      'Biruni’nin el-Kanun el-Mesudi’si':'Biruni, kitabın en güçlü karşılaştırmalı bilim figürlerinden biridir. Hindistan’ı içeriden anlamaya çalışırken ölçü, sayı, astronomi ve dil arasında geçiş yapar; farklı gelenekleri küçümsemeden karşılaştırmak, onun yönteminin ayırt edici tarafıdır.',
+      'Dandanakan ve Selçuklu yükselişi':'Dandanakan, kültürel hayatın bittiği bir iktidar değişimi olarak okunmaz. Gazneli ve Samani çevrelerinden devralınan şehirler, uzmanlar ve metinler yeni Selçuklu çatısı altında yeniden örgütlenir; siyasi kopuş, entelektüel akışla aynı şey değildir.',
+      'Nizamiye medreseleri':'Nizamiyeler, Starr’ın bilgi ile iktidar arasındaki gerilimi izlediği kurumlardır. Medreseler Sünni eğitimi ve devlet düzenini güçlendirmek için kurulurken, felsefe ve mantık gibi alanlar üzerindeki tartışma aklın kurum içinde hem barındırıldığını hem de sınırlandığını gösterir.',
+      'Kutadgu Bilig tamamlanır':'Yusuf Has Hacib’in metni, Türkçeyi yalnızca gündelik iletişimin değil, yönetim ve ahlak düşüncesinin dili olarak kurar. Hükümdar, danışman, adalet ve toplum arasındaki ilişkiyi tartışması, kitabın “medeniyet dili” sorusunu siyasal pratikle birleştirir.',
+      'Divanü Lügati’t-Türk':'Kaşgarlı’nın Divan’ı bir sözlükten fazlasıdır: atasözleri, şiirler, gündelik hayat ve boyların coğrafyası birlikte kayda geçirilir. Starr, Kaşgarlı’nın Arapça yazarak Türkî dünyayı eğitimli İslam dünyasına tanıttığını; haritasıyla kültürel merkezin yerini de yeniden tartışmaya açtığını vurgular.',
+      'Celali takvimi':'Celali takvimi, gökyüzünü ölçmenin yönetim ve gündelik zamanla buluştuğu örnektir. Hayyam ve çalışma arkadaşları için astronomi soyut bir merak değil, takvimin doğruluğunu ve devletin zaman üzerindeki düzenleme gücünü belirleyen pratik bir bilimdir.',
+      'Moğol istilası başlar':'Starr, Moğol istilasını şehirler, kütüphaneler ve nüfus üzerinde ağır bir kırılma olarak anlatır; Buhara, Merv, Nişabur ve Semerkant’ın kayıpları bu yüzden yalnız askerî tarih değildir. Ancak kültürel hareketlilik tamamen yok olmaz: insanlar, zanaatlar ve bilgiler yeni siyasi ağlarda yeniden dolaşır.',
+      'Marco Polo’nun doğu yolculukları':'Marco Polo, Moğol hâkimiyetinin açtığı geniş güzergâhları Avrupa’dan gözleyen bir tanıktır. Kart, yalnızca bir seyahat tarihini değil, siyasi birlik ile uzak coğrafyaların birbirini anlatabilir hale gelmesi arasındaki ilişkiyi gösterir.',
+      'Doğu Türkistan’da yazı ve matbaa':'Bu teknoloji kartı, kitabın daha geniş sorusuna bağlanır: Bir bilgi geleneğinin gücü yalnız üretilen fikirlerde değil, onların hangi malzemelerle çoğaltılabildiğinde de yatar. Yazı ve baskı teknikleri şehirler arası hafızanın taşıma kapasitesini artırır.',
+      'Timur doğar':'Starr’ın Timur portresi bilinçli bir çelişki taşır: Fetih, katliam ve zorunlu nakiller kültürel projenin karanlık maddi temelidir; aynı hükümdar Semerkant’ı ustaları, sanatçıları ve bilginleri toplayan bir gösteri merkezine dönüştürür. Canlanma, şiddetten bağımsız değildir.',
+      'Kara Ölüm':'Veba, kitabın kültür tarihine demografiyi geri sokar. Kentleri, üretim zincirlerini ve bilginleri taşıyan nüfusu sarsan bu kriz, savaş kadar güçlü bir kırılma yaratır; Orta Asya’nın gerilemesini yalnızca sarayların tercihleriyle açıklamamak gerekir.',
+      'Timur Bayezid’i esir alır':'Ankara zaferi, Timur’un gücünün Orta Asya dışına taşabildiğini gösterir; fakat Starr’ın asıl ilgisi fetih listesinden sonra başlar. Timur’un mirası, Semerkant ve Herat’ta kurulan himaye, dil, bilim ve sanat çevreleriyle ölçülür.',
+      'Ali Şir Nevai doğar':'Nevai, Çağataycayı Farsçanın gölgesinde kalan bir konuşma dili olmaktan çıkarıp yüksek edebiyatın taşıyıcısı olarak savunur. Herat’taki medrese, müzik, mimari ve sanat himayesiyle birlikte düşünüldüğünde dil, kültürel egemenlik kuran bir kurum haline gelir.',
+      'Uluğ Bey öldürülür':'Uluğ Bey’in ölümü, bilimsel başarının siyasi güvenceye eşit olmadığını gösteren trajik eşiktir. Semerkant medresesi ve rasathanesi, hükümdarın kişisel merakıyla yükselmiş olsa da onun iktidar mücadelesinde kırılgan kalır; kurumların devamı kişilere bağlandığında miras risk altına girer.',
+      'Kemaleddin Bihzad doğar':'Starr’ın Bihzad okumasında minyatür yalnızca süsleme değildir. Portrelerdeki karakter, hareket ve doğal ayrıntı, Herat çevresindeki sanatçıların dünyayı daha dikkatli gözlemlediğini gösterir; Nevâî ve Baykara himayesi bu görsel yeniliğin sosyal altyapısını sağlar.',
+      'Ali Kuşçu doğar':'Ali Kuşçu, Semerkant’taki bilim çevresinin tek bir şehirle sınırlı kalmadığını gösteren geçiş figürüdür. Rasathane, medrese ve bilgin seyahatleri üzerinden oluşan miras, Timurlu siyasi düzeni zayıfladıktan sonra da yeni merkezlerde yaşamaya devam eder.',
+      'Timur hanedanlığı yıkılır':'Retrospektif bölümünün uyarısı burada önemlidir: Bir hanedanın yıkılması, kültürel üretimin aynı gün sona erdiği anlamına gelmez; fakat uzun vadeli canlılık da yalnızca hükümdar değişimleriyle açıklanamaz. Açık kurumlar, hareketli ağlar ve bireysel merak birlikte korunmadığında altın çağ daralır.'
+    };
+    const bookRefByTitle = {
+      'Kentlerin ve ekmeğin ilk düğümleri':'Bölüm 1 · ss. 41–70',
+      'Zerdüşt ve tek tanrılı düşünce':'Bölüm 3 · ss. 111–156',
+      'Büyük İskender’in Orta Asya seferleri':'Bölüm 1 · ss. 41–70',
+      'Kuşan iktidarı ve Budizm':'Bölüm 3 · ss. 111–156',
+      'İpek batıya doğru yol alıyor':'Bölüm 2 · ss. 71–110',
+      'Arap fetihleri başlıyor':'Bölüm 4 · ss. 157–184',
+      'Talas Savaşı ve kâğıt bilgisi':'Bölüm 4–5 · ss. 157–218',
+      'Bağdat başkent olur':'Bölüm 5 · ss. 185–218',
+      'Memun ve akılcılık sınavları':'Bölüm 5–6 · ss. 185–262',
+      'Muhammed el-Buhari doğar':'Bölüm 6 · ss. 219–262',
+      'İsmail Samani Buhara’da':'Bölüm 8 · ss. 297–344',
+      'İsmail Samani türbesi':'Bölüm 8 · ss. 297–344',
+      'İbn-i Sina doğar':'Bölüm 1 ve 6 · ss. 41–70, 219–262',
+      'Gazneli Mahmut’un yükselişi':'Bölüm 11 · ss. 419–476',
+      'Biruni ve İbn-i Sina mektuplaşır':'Bölüm 1 ve 9 · ss. 41–70, 345–386',
+      'İbn-i Sina Ürgenç’e gider':'Bölüm 9 · ss. 345–386',
+      'Şehname tamamlanır':'Bölüm 8 · ss. 297–344',
+      'Memun Akademisi’nin sonu':'Bölüm 9 · ss. 345–386',
+      'Biruni’nin el-Kanun el-Mesudi’si':'Bölüm 6 ve 9 · ss. 219–262, 345–386',
+      'Dandanakan ve Selçuklu yükselişi':'Bölüm 12 · ss. 477–542',
+      'Nizamiye medreseleri':'Bölüm 12 · ss. 477–542',
+      'Kutadgu Bilig tamamlanır':'Bölüm 10 · ss. 387–418',
+      'Divanü Lügati’t-Türk':'Bölüm 10 · ss. 387–418',
+      'Celali takvimi':'Bölüm 12 · ss. 477–542',
+      'Moğol istilası başlar':'Bölüm 13 · ss. 543–592',
+      'Marco Polo’nun doğu yolculukları':'Bölüm 13 · ss. 543–592',
+      'Doğu Türkistan’da yazı ve matbaa':'Bölüm 13 · ss. 543–592',
+      'Timur doğar':'Bölüm 14 · ss. 593–634',
+      'Kara Ölüm':'Bölüm 13 · ss. 543–592',
+      'Timur Bayezid’i esir alır':'Bölüm 14 · ss. 593–634',
+      'Ali Şir Nevai doğar':'Bölüm 14 · ss. 593–634',
+      'Uluğ Bey öldürülür':'Bölüm 14 · ss. 593–634',
+      'Kemaleddin Bihzad doğar':'Bölüm 14 · ss. 593–634',
+      'Ali Kuşçu doğar':'Bölüm 14 · ss. 593–634',
+      'Timur hanedanlığı yıkılır':'Bölüm 14–15 · ss. 593–668'
+    };
+    const eraBookLenses = {
+      early:'Starr’ın ilk üç bölümünde bu dönem, tek bir halkın ya da imparatorluğun öncülük ettiği düz bir ilerleme olarak değil; kentler, inançlar ve uzun mesafeli ağların üst üste binmesi olarak okunur.',
+      conquest:'Fetih ve Bağdat bölümlerinde siyasi merkez ile bilgi merkezi sürekli yer değiştirir. Orta Asya, yeni İslamî kurumları yalnızca alan değil, onları besleyen bilginleri, dilleri ve yöntemleri üreten bir coğrafyadır.',
+      samanid:'Samani ve Gazneli bölümleri, kültürün siyasi sınırlar kadar himaye ağlarına ve şehirlerin taşıma kapasitesine bağlı olduğunu gösterir. Bir saray düşerken başka bir merkez, insanları ve metinleri devralabilir.',
+      seljuk:'Selçuklu bölümünde yükseliş ile daralma aynı anda görünür: medrese, takvim, şiir ve dil kurumlaşır; fakat felsefi sorgulama üzerindeki baskılar açık uçlu düşüncenin alanını daraltmaya başlar.',
+      mongol:'Moğol asrı, kent ve nüfus kaybının yanı sıra güzergâhların yeniden düzenlendiği bir dönemdir. Starr’ın anlatısında yıkım gerçektir; fakat kültürel mirasın yeni siyasi ve coğrafi kanallara taşınması da aynı derecede gerçektir.',
+      timurid:'Timurlu bölümü, şiddetli bir siyasi mirasın Semerkant ve Herat’ta bilim, dil ve sanat himayesine dönüşmesini izler. Bu parlaklık, kişisel himayeye bağlı olduğu için hem yaratıcı hem de kırılgandır.'
+    };
     function getContext(item) { return contextByTitle[item.title] || eraContexts[item.era]; }
+    function getBookLens(item) { return bookLensByTitle[item.title] || eraBookLenses[item.era]; }
+    function getBookRef(item) { return bookRefByTitle[item.title] || item.chapter + ' · Starr’ın tam metin baskısı'; }
 
     function yearToX(year, width) { return ((year - minYear) / (maxYear - minYear)) * width; }
     function formatTick(year) { return year < 0 ? 'MÖ ' + Math.abs(year) : year === 0 ? '' : 'MS ' + year; }
@@ -987,6 +1075,8 @@
       document.getElementById('modalTitle').textContent = item.title;
       document.getElementById('modalDescription').textContent = item.description;
       document.getElementById('modalContext').textContent = getContext(item);
+      document.getElementById('modalBookLens').textContent = getBookLens(item);
+      document.getElementById('modalBookRef').textContent = getBookRef(item);
       document.getElementById('modalTrack').textContent = trackLabels[item.track];
       document.getElementById('modalEra').textContent = eraLabels[item.era];
       document.getElementById('modalChapter').textContent = item.chapter;
